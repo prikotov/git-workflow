@@ -7,19 +7,32 @@ declare(strict_types=1);
  * git-workflow-init — copy git workflow documentation into the project.
  *
  * Usage:
- *   php vendor/bin/git-workflow-init [target-dir]
+ *   php vendor/bin/git-workflow-init [target-dir] [--force]
  *
- * What it does:
- *   1. Copies docs/ from the package into {target-dir}/docs/git-workflow/.
- *      Existing files are NOT overwritten.
- *   2. Prints a short post-init instruction.
+ *   target-dir  — project root (default: current working directory).
+ *   --force     — overwrite existing files with fresh copies from the package.
  */
 
+// ── Parse arguments ────────────────────────────────────────────────────────
+
+$force     = in_array('--force', $argv, true);
+$targetArg = null;
+
+foreach ($argv as $i => $arg) {
+    if ($i === 0 || $arg === '--force') {
+        continue;
+    }
+    $targetArg = $arg;
+    break;
+}
+
+// ── Resolve paths ──────────────────────────────────────────────────────────
+
 $packageRoot = dirname(__DIR__);
-$targetDir   = isset($argv[1]) ? realpath($argv[1]) : getcwd();
+$targetDir   = $targetArg !== null ? realpath($targetArg) : getcwd();
 
 if ($targetDir === false || !is_dir($targetDir)) {
-    fwrite(STDERR, "Error: target directory does not exist: " . ($argv[1] ?? getcwd()) . PHP_EOL);
+    fwrite(STDERR, "Error: target directory does not exist: " . ($targetArg ?? getcwd()) . PHP_EOL);
     exit(1);
 }
 
@@ -31,8 +44,15 @@ if (!is_dir($sourceDocs)) {
     exit(1);
 }
 
+if ($force) {
+    echo "  ⚠  --force: existing files will be overwritten." . PHP_EOL;
+}
+
+// ── Copy docs ──────────────────────────────────────────────────────────────
+
 $copied   = 0;
 $skipped  = 0;
+$updated  = 0;
 $iterator = new RecursiveIteratorIterator(
     new RecursiveDirectoryIterator($sourceDocs, RecursiveDirectoryIterator::SKIP_DOTS),
     RecursiveIteratorIterator::SELF_FIRST,
@@ -50,8 +70,14 @@ foreach ($iterator as $item) {
     }
 
     if (file_exists($targetPath)) {
-        echo "  Skip     docs/git-workflow/$relativePath (already exists)" . PHP_EOL;
-        $skipped++;
+        if ($force) {
+            copy($item->getPathname(), $targetPath);
+            echo "  Updated  docs/git-workflow/$relativePath" . PHP_EOL;
+            $updated++;
+        } else {
+            echo "  Skip     docs/git-workflow/$relativePath (already exists)" . PHP_EOL;
+            $skipped++;
+        }
         continue;
     }
 
@@ -65,36 +91,30 @@ foreach ($iterator as $item) {
     $copied++;
 }
 
-echo PHP_EOL;
-echo "Done. $copied file(s) copied, $skipped file(s) skipped." . PHP_EOL;
-
 // ── Update .gitignore ─────────────────────────────────────────────────────
 
 $gitignore  = $targetDir . '/docs/.gitignore';
 $entry      = 'git-workflow/';
-$written    = false;
 
 if (file_exists($gitignore)) {
     $content = file_get_contents($gitignore);
-    if (str_contains($content, $entry)) {
-        $written = true;
-    } else {
+    if (!str_contains($content, $entry)) {
         $content = rtrim($content) . PHP_EOL . $entry . PHP_EOL;
         file_put_contents($gitignore, $content);
-        $written = true;
+        echo "  Updated docs/.gitignore (+ git-workflow/)" . PHP_EOL;
     }
 } else {
     if (!is_dir(dirname($gitignore))) {
         mkdir(dirname($gitignore), 0755, true);
     }
     file_put_contents($gitignore, $entry . PHP_EOL);
-    $written = true;
-}
-
-if ($written) {
     echo "  Updated docs/.gitignore (+ git-workflow/)" . PHP_EOL;
 }
 
+// ── Summary ────────────────────────────────────────────────────────────────
+
+echo PHP_EOL;
+echo "Done. $copied copied, $updated updated, $skipped skipped." . PHP_EOL;
 echo PHP_EOL;
 echo "Next steps:" . PHP_EOL;
 echo "  1. Add these lines to your project's AGENTS.md:" . PHP_EOL;
