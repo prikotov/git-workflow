@@ -1,7 +1,6 @@
 {
     "name": "prikotov/git-workflow",
     "description": "Git workflow standards: branches, commits, PRs, releases, code review",
-    "version": "1.0.0",
     "license": "MIT",
     "keywords": ["git", "workflow", "conventional-commits", "code-review", "release"],
     "authors": [
