@@ -8,24 +8,24 @@ A set of conventions and rules for Git-based development workflow. Covers branch
 
 ## Contents
 
-- [Index](index.md) — table of contents
-- [Branches](branches.md) — branch types, naming, lifecycle
-- [Commits](commits.md) — Conventional Commits format and rules
-- [Pull Request](pull-request.md) — PR process and requirements
-- [Code Review](code-review.md) — review checklist and rules
-- [Release](release.md) — SemVer, release model, CHANGELOG
-- [Deploy](deploy.md) — deployment rules
-- [Release Checklists](release-checklists.md) — checklists for release, hotfix, deploy
+- [Index](doc/index.md) — table of contents
+- [Branches](doc/branches.md) — branch types, naming, lifecycle
+- [Commits](doc/commits.md) — Conventional Commits format and rules
+- [Pull Request](doc/pull-request.md) — PR process and requirements
+- [Code Review](doc/code-review.md) — review checklist and rules
+- [Release](doc/release.md) — SemVer, release model, CHANGELOG
+- [Deploy](doc/deploy.md) — deployment rules
+- [Release Checklists](doc/release-checklists.md) — checklists for release, hotfix, deploy
 
 ## Usage
 
 Reference these documents from your project's `AGENTS.md` or include them directly:
 
 ```
-Git workflow rules: vendor/prikotov/git-workflow/
+Git workflow rules: vendor/prikotov/git-workflow/doc/
 ```
 
-Customize scope examples in `commits.md` for your project's module/app structure.
+Customize scope examples in `doc/commits.md` for your project's module/app structure.
 
 ## License
 
