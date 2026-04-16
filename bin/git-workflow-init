@@ -67,9 +67,36 @@ foreach ($iterator as $item) {
 
 echo PHP_EOL;
 echo "Done. $copied file(s) copied, $skipped file(s) skipped." . PHP_EOL;
+
+// ── Update .gitignore ─────────────────────────────────────────────────────
+
+$gitignore  = $targetDir . '/docs/.gitignore';
+$entry      = 'git-workflow/';
+$written    = false;
+
+if (file_exists($gitignore)) {
+    $content = file_get_contents($gitignore);
+    if (str_contains($content, $entry)) {
+        $written = true;
+    } else {
+        $content = rtrim($content) . PHP_EOL . $entry . PHP_EOL;
+        file_put_contents($gitignore, $content);
+        $written = true;
+    }
+} else {
+    if (!is_dir(dirname($gitignore))) {
+        mkdir(dirname($gitignore), 0755, true);
+    }
+    file_put_contents($gitignore, $entry . PHP_EOL);
+    $written = true;
+}
+
+if ($written) {
+    echo "  Updated docs/.gitignore (+ git-workflow/)" . PHP_EOL;
+}
+
 echo PHP_EOL;
 echo "Next steps:" . PHP_EOL;
 echo "  1. Add these lines to your project's AGENTS.md:" . PHP_EOL;
 echo "     * Коммиты — [docs/git-workflow/commits.md](docs/git-workflow/commits.md)." . PHP_EOL;
 echo "     * Pull Requests — [docs/git-workflow/pull-request.md](docs/git-workflow/pull-request.md)." . PHP_EOL;
-echo "  2. Commit docs/git-workflow/ to your repository." . PHP_EOL;
