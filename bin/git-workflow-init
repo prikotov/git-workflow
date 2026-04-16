@@ -1,0 +1,75 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * git-workflow-init — copy git workflow documentation into the project.
+ *
+ * Usage:
+ *   php vendor/bin/git-workflow-init [target-dir]
+ *
+ * What it does:
+ *   1. Copies docs/ from the package into {target-dir}/docs/git-workflow/.
+ *      Existing files are NOT overwritten.
+ *   2. Prints a short post-init instruction.
+ */
+
+$packageRoot = dirname(__DIR__);
+$targetDir   = isset($argv[1]) ? realpath($argv[1]) : getcwd();
+
+if ($targetDir === false || !is_dir($targetDir)) {
+    fwrite(STDERR, "Error: target directory does not exist: " . ($argv[1] ?? getcwd()) . PHP_EOL);
+    exit(1);
+}
+
+$sourceDocs = $packageRoot . '/docs';
+$targetDocs = $targetDir . '/docs/git-workflow';
+
+if (!is_dir($sourceDocs)) {
+    fwrite(STDERR, "Error: package docs/ not found at $sourceDocs" . PHP_EOL);
+    exit(1);
+}
+
+$copied   = 0;
+$skipped  = 0;
+$iterator = new RecursiveIteratorIterator(
+    new RecursiveDirectoryIterator($sourceDocs, RecursiveDirectoryIterator::SKIP_DOTS),
+    RecursiveIteratorIterator::SELF_FIRST,
+);
+
+foreach ($iterator as $item) {
+    $relativePath = substr($item->getPathname(), strlen($sourceDocs) + 1);
+    $targetPath   = $targetDocs . '/' . $relativePath;
+
+    if ($item->isDir()) {
+        if (!is_dir($targetPath)) {
+            mkdir($targetPath, 0755, true);
+        }
+        continue;
+    }
+
+    if (file_exists($targetPath)) {
+        echo "  Skip     docs/git-workflow/$relativePath (already exists)" . PHP_EOL;
+        $skipped++;
+        continue;
+    }
+
+    $targetDirForFile = dirname($targetPath);
+    if (!is_dir($targetDirForFile)) {
+        mkdir($targetDirForFile, 0755, true);
+    }
+
+    copy($item->getPathname(), $targetPath);
+    echo "  Copied   docs/git-workflow/$relativePath" . PHP_EOL;
+    $copied++;
+}
+
+echo PHP_EOL;
+echo "Done. $copied file(s) copied, $skipped file(s) skipped." . PHP_EOL;
+echo PHP_EOL;
+echo "Next steps:" . PHP_EOL;
+echo "  1. Add these lines to your project's AGENTS.md:" . PHP_EOL;
+echo "     * Коммиты — [docs/git-workflow/commits.md](docs/git-workflow/commits.md)." . PHP_EOL;
+echo "     * Pull Requests — [docs/git-workflow/pull-request.md](docs/git-workflow/pull-request.md)." . PHP_EOL;
+echo "  2. Commit docs/git-workflow/ to your repository." . PHP_EOL;
