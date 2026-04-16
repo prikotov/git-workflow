@@ -1,0 +1,26 @@
+{
+    "name": "prikotov/git-workflow",
+    "description": "Git workflow standards: branches, commits, PRs, releases, code review",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["git", "workflow", "conventional-commits", "code-review", "release"],
+    "authors": [
+        {
+            "name": "Dmitry Prikotov",
+            "email": "prikotov@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.4"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.0-dev"
+        }
+    }
+}
