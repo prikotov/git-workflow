@@ -16,6 +16,7 @@ A set of conventions and rules for Git-based development workflow. Covers branch
 - [Release](doc/release.md) — SemVer, release model, CHANGELOG
 - [Deploy](doc/deploy.md) — deployment rules
 - [Release Checklists](doc/release-checklists.md) — checklists for release, hotfix, deploy
+- [Release Artifacts](doc/releases/index.md) — release plan template and storage rules
 
 ## Usage
 
