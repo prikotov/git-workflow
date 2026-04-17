@@ -43,7 +43,7 @@ if ($targetDir === false || !is_dir($targetDir)) {
     exit(1);
 }
 
-$sourceDocs = $packageRoot . '/docs';
+$sourceDocs = $packageRoot . '/docs/git-workflow';
 $docsPath   = $docsPath ?? 'docs/git-workflow';
 $targetDocs = $targetDir . '/' . $docsPath;
 
