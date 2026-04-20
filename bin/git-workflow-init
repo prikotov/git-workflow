@@ -99,6 +99,19 @@ foreach ($iterator as $item) {
     $copied++;
 }
 
+// ── Create docs/releases/ with .gitkeep ───────────────────────────────────
+
+$releasesDir = $targetDir . '/docs/releases';
+if (!is_dir($releasesDir)) {
+    mkdir($releasesDir, 0755, true);
+    echo "  Created  docs/releases/" . PHP_EOL;
+}
+$gitkeep = $releasesDir . '/.gitkeep';
+if (!file_exists($gitkeep)) {
+    file_put_contents($gitkeep, '');
+    echo "  Created  docs/releases/.gitkeep" . PHP_EOL;
+}
+
 // ── Update .gitignore ─────────────────────────────────────────────────────
 
 $gitignore     = $targetDir . '/docs/.gitignore';
