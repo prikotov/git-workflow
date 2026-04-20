@@ -58,8 +58,8 @@ git push -u origin release/x.y
 
 Для каждого production release перед deploy создаётся документ `docs/releases/vX.Y.Z/release-plan.md`.
 
-- место хранения: [Артефакты релиза](../releases/index.md);
-- шаблон: [Шаблон плана релиза](../releases/templates/release-plan.template.md);
+- место хранения: `docs/releases/`;
+- шаблон: [release-plan.template.md](./templates/release-plan.template.md).
 - без заполненного `release-plan.md` deploy не начинается.
 
 Базовое создание документа после определения тега релиза:
