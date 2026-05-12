@@ -8,15 +8,15 @@ A set of conventions and rules for Git-based development workflow. Covers branch
 
 ## Contents
 
-- [Index](docs/index.md) — table of contents
-- [Branches](docs/branches.md) — branch types, naming, lifecycle
-- [Commits](docs/commits.md) — Conventional Commits format and rules
-- [Pull Request](docs/pull-request.md) — PR process and requirements
-- [Code Review](docs/code-review.md) — review checklist and rules
-- [Release](docs/release.md) — SemVer, release model, CHANGELOG
-- [Deploy](docs/deploy.md) — deployment rules
-- [Release Checklists](docs/release-checklists.md) — checklists for release, hotfix, deploy
-- [Release Artifacts](docs/releases/index.md) — release plan template and storage rules
+- [Index](docs/git-workflow/index.md) — table of contents
+- [Branches](docs/git-workflow/branches.md) — branch types, naming, lifecycle
+- [Commits](docs/git-workflow/commits.md) — Conventional Commits format and rules
+- [Pull Request](docs/git-workflow/pull-request.md) — PR process and requirements
+- [Code Review](docs/git-workflow/code-review.md) — review checklist and rules
+- [Release](docs/git-workflow/release.md) — SemVer, release model, CHANGELOG
+- [Deploy](docs/git-workflow/deploy.md) — deployment rules
+- [Release Checklists](docs/git-workflow/release-checklists.md) — checklists for release, hotfix, deploy
+- [Release Artifacts](docs/git-workflow/releases/index.md) — release plan template and storage rules
 
 ## Installation
 
