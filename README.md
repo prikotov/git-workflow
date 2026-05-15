@@ -1,45 +1,51 @@
-# prikotov/git-workflow
+# git-workflow
 
-Git workflow standards: branches, commits, PRs, releases, and code review.
+## Правила Git-процесса для AI-агентов
 
-## What is it
+Командная работа в Git требует единых правил: как называть ветки, форматировать коммиты, проводить ревью и выпускать релизы.
 
-A set of conventions and rules for Git-based development workflow. Covers branching strategy, commit message format (Conventional Commits), pull request process, code review checklist, release management, and deployment guidelines.
+Пакет содержит правила Git-процесса: ветки, коммиты (Conventional Commits), пулреквесты, кодревью, релизы, деплой. Правила описаны в документации, передаваемой AI-агенту в качестве контекста.
 
-## Contents
+---
 
-- [Index](docs/git-workflow/index.md) — table of contents
-- [Branches](docs/git-workflow/branches.md) — branch types, naming, lifecycle
-- [Commits](docs/git-workflow/commits.md) — Conventional Commits format and rules
-- [Pull Request](docs/git-workflow/pull-request.md) — PR process and requirements
-- [Code Review](docs/git-workflow/code-review.md) — review checklist and rules
-- [Release](docs/git-workflow/release.md) — SemVer, release model, CHANGELOG
-- [Deploy](docs/git-workflow/deploy.md) — deployment rules
-- [Release Checklists](docs/git-workflow/release-checklists.md) — checklists for release, hotfix, deploy
-- [Release Artifacts](docs/git-workflow/releases/index.md) — release plan template and storage rules
+## Правила
 
-## Installation
+- **Ветки** — как назвать ветку для задачи, релиза или хотфикса; когда удалить
+- **Коммиты** — Conventional Commits: тип, scope, subject — чтобы история читалась как журнал изменений
+- **Пулреквесты** — от создания до мержа: проверки, ревью, squash
+- **Кодревью** — что проверять, замечания, апрув
+- **Релизы** — SemVer, release-ветки, CHANGELOG
+- **Деплой** — когда и как развёртывать
+- **Чеклисты** — пошаговые списки для релиза, хотфикса и деплоя
+
+Полное содержание: [`docs/git-workflow/index.md`](docs/git-workflow/index.md).
+
+---
+
+---
+
+## Установка в проект
 
 ```bash
 composer require --dev prikotov/git-workflow
 ```
 
-## Initialisation
-
-To copy git workflow documentation into your project:
+### Копирование правил в проект
 
 ```bash
 php vendor/bin/git-workflow-init
 ```
 
-Or specify a target directory:
+Команда копирует документацию в `docs/git-workflow/`. Существующие файлы не перезаписываются; флаг `--force` включает перезапись.
+
+Пример с нестандартным путём:
 
 ```bash
-php vendor/bin/git-workflow-init /path/to/project
+php vendor/bin/git-workflow-init /path/to/project --docs-path=docs/flow --force
 ```
 
-This copies `docs/` into `docs/git-workflow/` in your project. Existing files are never overwritten.
+---
 
-> **Note:** Re-running the command is safe.
+## License
 
-## Reference (in package)
+[MIT](LICENSE)
