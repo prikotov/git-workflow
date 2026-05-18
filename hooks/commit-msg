@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ── Commit-msg hook: validate message against Conventional Commits ─────────
+#
+# Install:
+#   cp vendor/prikotov/git-workflow/hooks/commit-msg .git/hooks/commit-msg
+#
+# Or via init script (recommended):
+#   php vendor/bin/git-workflow-init --hooks
+#
+# Skip temporarily:
+#   git commit --no-verify
+
+vendor/bin/validate-commit "$1"

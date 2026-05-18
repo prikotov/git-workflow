@@ -9,7 +9,7 @@
             "email": "prikotov@gmail.com"
         }
     ],
-    "bin": ["bin/git-workflow-init"],
+    "bin": ["bin/git-workflow-init", "bin/git-secret-guard", "bin/validate-commit"],
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
@@ -25,5 +25,8 @@
     },
     "archive": {
         "include": ["/bin/"]
+    },
+    "require-dev": {
+        "ramsey/conventional-commits": "^1.7"
     }
 }
