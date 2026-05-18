@@ -17,8 +17,33 @@
 - **Релизы** — SemVer, release-ветки, CHANGELOG
 - **Деплой** — когда и как развёртывать
 - **Чеклисты** — пошаговые списки для релиза, хотфикса и деплоя
+- **Секреты** — защита от коммита токенов, паролей, ключей
 
 Полное содержание: [`docs/git-workflow/index.md`](docs/git-workflow/index.md).
+
+---
+
+## Secret Scanning
+
+Пакет поставляет конфиг для [Gitleaks](https://github.com/gitleaks/gitleaks) — зрелого OSS-сканера секретов с 100+ правилами детекции (AWS, GitHub, GCP, JWT, SSH и др.).
+
+```bash
+# Установить Gitleaks
+sudo dnf install gitleaks  # Fedora/RHEL
+brew install gitleaks      # macOS
+
+# Установить commit-msg хук
+php vendor/bin/git-workflow-init --hooks
+
+# Добавить в свой pre-commit hook
+echo 'gitleaks protect --staged' >> .git/hooks/pre-commit
+
+# (опционально) Кастомный конфиг — пример в templates/gitleaks.toml.example
+```
+
+Pre-commit hook не устанавливается автоматически — им управляет проект (lefthook, husky, свой скрипт).
+
+Детали: [`docs/git-workflow/secrets.md`](docs/git-workflow/secrets.md).
 
 ---
 
@@ -33,10 +58,16 @@ composer require --dev prikotov/git-workflow
 ### Копирование правил в проект
 
 ```bash
-php vendor/bin/git-workflow-init
+php vendor/bin/git-workflow-init --hooks
 ```
 
-Команда копирует документацию в `docs/git-workflow/`. Существующие файлы не перезаписываются; флаг `--force` включает перезапись.
+Флаг `--hooks` установит git-хуки (`commit-msg`, `pre-commit`) в `.git/hooks/`. Существующие файлы не перезаписываются; флаг `--force` включает перезапись.
+
+Без `--hooks` — только документация:
+
+```bash
+php vendor/bin/git-workflow-init
+```
 
 Пример с нестандартным путём:
 

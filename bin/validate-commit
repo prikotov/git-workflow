@@ -1,0 +1,325 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * validate-commit — validate commit message against Conventional Commits.
+ *
+ * Used as git commit-msg hook. Reads allowed scopes from config file.
+ *
+ * Usage:
+ *   vendor/bin/validate-commit <commit-msg-file> [options]
+ *
+ * Options:
+ *   --config=<path>   Config file path (default: .commit-conventions.json).
+ *   -h, --help        Show this help message.
+ *
+ * Config file (.commit-conventions.json):
+ * {
+ *   "scopes": ["app-web", "app-api", "Billing", "Source", "devops"],
+ *   "examples": [
+ *     "feat(Source): add endpoint / добавить эндпоинт",
+ *     "fix(app-web): fix submit / исправить отправку"
+ *   ]
+ * }
+ *
+ * If config file is missing, scopes are not validated (any non-empty scope passes).
+ */
+
+use Ramsey\ConventionalCommits\Exception\InvalidCommitMessage;
+use Ramsey\ConventionalCommits\Parser;
+
+// ── Autoload ───────────────────────────────────────────────────────────────
+
+$autoloadLocations = [
+    __DIR__ . '/../vendor/autoload.php',       // package root
+    __DIR__ . '/../../autoload.php',           // composer bin vendor
+    getcwd() . '/vendor/autoload.php',         // project root
+];
+
+$autoload = null;
+foreach ($autoloadLocations as $path) {
+    if (file_exists($path)) {
+        $autoload = $path;
+        break;
+    }
+}
+
+if ($autoload === null) {
+    fwrite(STDERR, 'Error: composer autoload not found. Run "composer install".' . PHP_EOL);
+    exit(2);
+}
+
+require $autoload;
+
+// ── Types ──────────────────────────────────────────────────────────────────
+
+const VALID_TYPES = [
+    'fix' => 'Bug fix',
+    'feat' => 'New feature',
+    'build' => 'Changes that affect the build system or external dependencies',
+    'chore' => 'Other changes that don\'t modify src or test files',
+    'ci' => 'Changes to CI configuration files and scripts',
+    'docs' => 'Documentation only changes',
+    'style' => 'Code style changes (formatting, missing semicolons, etc.)',
+    'refactor' => 'Code refactoring',
+    'perf' => 'Performance improvements',
+    'test' => 'Adding or updating tests',
+    'revert' => 'Reverts a previous commit',
+];
+
+// ── Main ───────────────────────────────────────────────────────────────────
+
+function main(array $argv): int
+{
+    $args = parseArgs($argv);
+
+    if ($args['help']) {
+        printHelp();
+        return 0;
+    }
+
+    if ($args['file'] === null) {
+        fwrite(STDERR, 'Error: commit message file path is required.' . PHP_EOL);
+        fwrite(STDERR, 'Usage: vendor/bin/validate-commit <commit-msg-file>' . PHP_EOL);
+        return 2;
+    }
+
+    $config = loadConfig($args['config']);
+    $exitCode = validateCommitMessage($args['file'], $config);
+
+    return $exitCode;
+}
+
+// ── Argument parsing ───────────────────────────────────────────────────────
+
+/**
+ * @return array{file: string|null, config: string|null, help: bool}
+ */
+function parseArgs(array $argv): array
+{
+    $result = ['file' => null, 'config' => null, 'help' => false];
+
+    foreach ($argv as $i => $arg) {
+        if ($i === 0) {
+            continue;
+        }
+
+        if ($arg === '--help' || $arg === '-h') {
+            $result['help'] = true;
+        } elseif (str_starts_with($arg, '--config=')) {
+            $result['config'] = substr($arg, strlen('--config='));
+        } elseif (!str_starts_with($arg, '-')) {
+            $result['file'] = $arg;
+        }
+    }
+
+    // Default config path
+    if ($result['config'] === null) {
+        $root = getGitRoot();
+        $result['config'] = $root . '/.commit-conventions.json';
+    }
+
+    return $result;
+}
+
+// ── Help ───────────────────────────────────────────────────────────────────
+
+function printHelp(): void
+{
+    echo <<<'HELP'
+validate-commit — validate commit message against Conventional Commits
+
+Usage:
+  vendor/bin/validate-commit <commit-msg-file> [--config=<path>]
+
+Options:
+  --config=<path>   Config file (default: .commit-conventions.json).
+  -h, --help        Show this help message.
+
+Config file (.commit-conventions.json):
+  {
+    "scopes": ["app-web", "app-api", "Billing", "Source", "devops"],
+    "examples": [
+      "feat(Source): add endpoint / добавить эндпоинт",
+      "fix(app-web): fix submit / исправить отправку"
+    ]
+  }
+
+If config file is missing, scopes are not validated (any non-empty scope passes).
+
+Exit codes:
+  0  Valid commit message.
+  1  Invalid commit message.
+  2  Config or runtime error.
+
+HELP;
+}
+
+// ── Git helpers ────────────────────────────────────────────────────────────
+
+function getGitRoot(): string
+{
+    $output = [];
+    $exitCode = 0;
+    exec('git rev-parse --show-toplevel 2>/dev/null', $output, $exitCode);
+
+    if ($exitCode !== 0 || $output === []) {
+        return getcwd() ?: '.';
+    }
+
+    return $output[0];
+}
+
+// ── Config ─────────────────────────────────────────────────────────────────
+
+/**
+ * @return array{scopes: list<string>, examples: list<string>}
+ */
+function loadConfig(string $path): array
+{
+    $defaults = ['scopes' => [], 'examples' => []];
+
+    if (!file_exists($path)) {
+        return $defaults;
+    }
+
+    $content = file_get_contents($path);
+    if ($content === false) {
+        fwrite(STDERR, "Warning: cannot read config: $path" . PHP_EOL);
+        return $defaults;
+    }
+
+    $config = json_decode($content, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        fwrite(STDERR, "Error: invalid JSON in config: $path" . PHP_EOL);
+        fwrite(STDERR, '  ' . json_last_error_msg() . PHP_EOL);
+        exit(2);
+    }
+
+    if (!is_array($config)) {
+        fwrite(STDERR, "Error: config must be a JSON object: $path" . PHP_EOL);
+        exit(2);
+    }
+
+    return array_merge($defaults, $config);
+}
+
+// ── Validation ─────────────────────────────────────────────────────────────
+
+/**
+ * @param array{scopes: list<string>, examples: list<string>} $config
+ */
+function validateCommitMessage(string $filePath, array $config): int
+{
+    if (!file_exists($filePath)) {
+        error("Commit message file not found: {$filePath}");
+    }
+
+    $commitMessage = trim(file_get_contents($filePath));
+
+    if ($commitMessage === '') {
+        error('Commit message is empty.');
+    }
+
+    try {
+        $parser = new Parser();
+        $message = $parser->parse($commitMessage);
+    } catch (InvalidCommitMessage $e) {
+        $error = 'Invalid commit message format.' . PHP_EOL . PHP_EOL;
+        $error .= "  Message: \"{$commitMessage}\"" . PHP_EOL . PHP_EOL;
+        $error .= '  Expected format: <type>(<scope>): <subject>' . PHP_EOL . PHP_EOL;
+        $error .= '  Allowed types: ' . formatList(array_keys(VALID_TYPES)) . PHP_EOL;
+
+        if ($config['scopes'] !== []) {
+            $error .= '  Allowed scopes: ' . formatList($config['scopes']) . PHP_EOL;
+        }
+
+        if ($config['examples'] !== []) {
+            $error .= PHP_EOL . '  Examples:' . PHP_EOL;
+            foreach ($config['examples'] as $example) {
+                $error .= "    {$example}" . PHP_EOL;
+            }
+        }
+
+        error($error);
+    } catch (Throwable $e) {
+        error('Parse error: ' . $e->getMessage());
+    }
+
+    // Validate type
+    $type = $message->getType()->toString();
+    if (!isset(VALID_TYPES[$type])) {
+        $msg = "Invalid commit type: '{$type}'." . PHP_EOL . PHP_EOL;
+        $msg .= '  Allowed types:' . PHP_EOL;
+        foreach (VALID_TYPES as $t => $desc) {
+            $msg .= "    {$t} — {$desc}" . PHP_EOL;
+        }
+        error($msg);
+    }
+
+    // Validate scope (if scopes are configured)
+    $scope = $message->getScope()?->toString();
+    if ($config['scopes'] !== [] && $scope !== null && $scope !== '') {
+        if (!in_array($scope, $config['scopes'], true)) {
+            $msg = "Invalid scope: '{$scope}'." . PHP_EOL . PHP_EOL;
+            $msg .= '  Allowed scopes: ' . formatList($config['scopes']) . PHP_EOL;
+            error($msg);
+        }
+    }
+
+    // Validate subject
+    $subject = $message->getDescription()->toString();
+
+    if ($subject === '') {
+        error('Subject cannot be empty.');
+    }
+
+    if (preg_match('/^[A-Z]/', $subject)) {
+        $fixed = strtolower($subject[0]) . substr($subject, 1);
+        $scopeStr = $scope !== null ? "({$scope})" : '';
+        error(
+            "Subject must start with a lowercase letter." . PHP_EOL
+            . "  Current:  \"{$subject}\"" . PHP_EOL
+            . "  Fix:      \"{$type}{$scopeStr}: {$fixed}\""
+        );
+    }
+
+    if (str_ends_with($subject, '.')) {
+        $fixed = substr($subject, 0, -1);
+        error(
+            "Subject must not end with a period." . PHP_EOL
+            . "  Current: \"{$subject}\"" . PHP_EOL
+            . "  Fix:     \"{$fixed}\""
+        );
+    }
+
+    if ($type !== 'revert' && str_contains($subject, ':')) {
+        error(
+            "Subject must not contain a colon." . PHP_EOL
+            . "  The colon conflicts with the <type>(<scope>): <subject> format." . PHP_EOL
+            . "  Current: \"{$subject}\"" . PHP_EOL
+            . "  Use / or , as separator instead."
+        );
+    }
+
+    return 0;
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+function error(string $message): never
+{
+    fwrite(STDERR, '✗ ' . $message . PHP_EOL);
+    exit(1);
+}
+
+function formatList(array $values): string
+{
+    return implode(', ', $values);
+}
+
+// ── Run ────────────────────────────────────────────────────────────────────
+
+exit(main($argv));

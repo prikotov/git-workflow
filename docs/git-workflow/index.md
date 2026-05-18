@@ -15,3 +15,4 @@
 - [Деплой (Deploy)](deploy.md)
 - [Чеклисты релиза и hotfix](release-checklists.md)
 - [Артефакты релиза](releases/index.md)
+- [Защита от коммита секретов](secrets.md)
