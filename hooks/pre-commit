@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ── Pre-commit hook: scan staged changes for secrets ───────────────────────
+#
+# Install:
+#   cp vendor/prikotov/git-workflow/hooks/pre-commit .git/hooks/pre-commit
+#
+# Or via init script (recommended):
+#   php vendor/bin/git-workflow-init --hooks
+#
+# Skip temporarily:
+#   git commit --no-verify
+
+if [ -f "Makefile" ] && grep -qE '^security:' Makefile; then
+    make --no-print-directory security
+    exit $?
+fi
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+    echo "gitleaks is required to scan staged changes for secrets." >&2
+    echo "Install gitleaks or add a project-specific 'security' target to Makefile." >&2
+    exit 1
+fi
+
+gitleaks protect --staged --redact --no-banner --log-level warn
