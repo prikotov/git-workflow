@@ -96,14 +96,19 @@ Scope указывает на область изменения, в качест
 
 Пакет `git-workflow` поставляет валидатор сообщений коммитов на основе Conventional Commits.
 
-### Установка commit-msg хука
+### Установка хуков
 
 ```bash
-cp vendor/prikotov/git-workflow/hooks/commit-msg .git/hooks/commit-msg
-chmod +x .git/hooks/commit-msg
+php vendor/bin/git-workflow-init --hooks
 ```
 
-Хук автоматически проверяет каждое сообщение коммита.
+Команда устанавливает `commit-msg` и `pre-commit` хуки в `.git/hooks/`. Существующие хуки не перезаписываются; флаг `--force` включает перезапись.
+
+Установка только документации (без хуков):
+
+```bash
+php vendor/bin/git-workflow-init
+```
 
 ### Ручной запуск
 

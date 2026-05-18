@@ -7,16 +7,18 @@ declare(strict_types=1);
  * git-workflow-init — copy git workflow documentation into the project.
  *
  * Usage:
- *   php vendor/bin/git-workflow-init [target-dir] [--docs-path=<path>] [--force]
+ *   php vendor/bin/git-workflow-init [target-dir] [--docs-path=<path>] [--hooks] [--force]
  *
  *   target-dir   — project root (default: current working directory).
  *   --docs-path  — relative path where docs will be copied (default: docs/git-workflow/).
+ *   --hooks      — install git hooks (commit-msg, pre-commit) into .git/hooks/.
  *   --force      — overwrite existing files with fresh copies from the package.
  */
 
 // ── Parse arguments ────────────────────────────────────────────────────────
 
 $force     = false;
+$hooks     = false;
 $targetArg = null;
 $docsPath  = null;
 
@@ -26,6 +28,8 @@ foreach ($argv as $i => $arg) {
     }
     if ($arg === '--force') {
         $force = true;
+    } elseif ($arg === '--hooks') {
+        $hooks = true;
     } elseif (str_starts_with($arg, '--docs-path=')) {
         $docsPath = substr($arg, strlen('--docs-path='));
     } else {
@@ -133,12 +137,68 @@ if (file_exists($gitignore)) {
     echo "  Updated docs/.gitignore (+ $entry)" . PHP_EOL;
 }
 
+// ── Install hooks ─────────────────────────────────────────────────────────
+
+$hooksInstalled = 0;
+$hooksSkipped   = 0;
+
+if ($hooks) {
+    $sourceHooks = $packageRoot . '/hooks';
+    $targetHooks = $targetDir . '/.git/hooks';
+
+    if (!is_dir($sourceHooks)) {
+        fwrite(STDERR, "  Warning: hooks/ directory not found in package." . PHP_EOL);
+    } elseif (!is_dir($targetHooks)) {
+        fwrite(STDERR, "  Warning: .git/hooks/ not found at $targetHooks." . PHP_EOL);
+        fwrite(STDERR, '  Make sure you are in a git repository.' . PHP_EOL);
+    } else {
+        $hookFiles = glob($sourceHooks . '/*');
+        if ($hookFiles === []) {
+            fwrite(STDERR, '  Warning: no hook templates found in package hooks/.' . PHP_EOL);
+        }
+
+        foreach ($hookFiles as $hookFile) {
+            if (!is_file($hookFile)) {
+                continue;
+            }
+
+            $hookName    = basename($hookFile);
+            $targetHook  = $targetHooks . '/' . $hookName;
+
+            if (file_exists($targetHook) && !$force) {
+                echo "  Skip     .git/hooks/$hookName (already exists)" . PHP_EOL;
+                $hooksSkipped++;
+                continue;
+            }
+
+            copy($hookFile, $targetHook);
+            chmod($targetHook, 0755);
+
+            $action = file_exists($targetHook) && !$force ? 'Copied' : 'Installed';
+            if ($force && file_exists($targetHook)) {
+                $action = 'Updated';
+            }
+            echo "  $action  .git/hooks/$hookName" . PHP_EOL;
+            $hooksInstalled++;
+        }
+    }
+}
+
 // ── Summary ────────────────────────────────────────────────────────────────
 
 echo PHP_EOL;
 echo "Done. $copied copied, $updated updated, $skipped skipped." . PHP_EOL;
+if ($hooks) {
+    echo "Hooks: $hooksInstalled installed, $hooksSkipped skipped." . PHP_EOL;
+}
 echo PHP_EOL;
 echo "Next steps:" . PHP_EOL;
 echo "  1. Add these lines to your project's AGENTS.md:" . PHP_EOL;
 echo "     * Коммиты — [$docsPath/commits.md]($docsPath/commits.md)." . PHP_EOL;
 echo "     * Pull Requests — [$docsPath/pull-request.md]($docsPath/pull-request.md)." . PHP_EOL;
+
+if (!$hooks) {
+    echo PHP_EOL;
+    echo 'To install git hooks (commit-msg, pre-commit):' . PHP_EOL;
+    echo '  php vendor/bin/git-workflow-init --hooks' . PHP_EOL;
+}

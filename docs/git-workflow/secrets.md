@@ -16,11 +16,18 @@
 composer require --dev prikotov/git-workflow
 ```
 
-### Установка pre-commit хука
+### Установка хуков
 
 ```bash
-cp vendor/prikotov/git-workflow/hooks/pre-commit .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit
+php vendor/bin/git-workflow-init --hooks
+```
+
+Команда устанавливает `commit-msg` и `pre-commit` хуки в `.git/hooks/`. Существующие хуки не перезаписываются; флаг `--force` включает перезапись.
+
+Установка только документации (без хуков):
+
+```bash
+php vendor/bin/git-workflow-init
 ```
 
 ### Ручной запуск

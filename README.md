@@ -50,10 +50,16 @@ composer require --dev prikotov/git-workflow
 ### Копирование правил в проект
 
 ```bash
-php vendor/bin/git-workflow-init
+php vendor/bin/git-workflow-init --hooks
 ```
 
-Команда копирует документацию в `docs/git-workflow/`. Существующие файлы не перезаписываются; флаг `--force` включает перезапись.
+Флаг `--hooks` установит git-хуки (`commit-msg`, `pre-commit`) в `.git/hooks/`. Существующие файлы не перезаписываются; флаг `--force` включает перезапись.
+
+Без `--hooks` — только документация:
+
+```bash
+php vendor/bin/git-workflow-init
+```
 
 Пример с нестандартным путём:
 
