@@ -8,145 +8,110 @@
 
 Локальный pre-commit hook ловит утечку **до** commit.
 
+## Инструмент — Gitleaks
+
+[Gitleaks](https://github.com/gitleaks/gitleaks) — зрелый OSS-сканер на Go с 100+ правилами детекции:
+- AWS Access Key / Secret Key
+- GitHub Token / OAuth
+- Google (GCP) Service Account / API Key
+- Stripe, Slack, JWT, SSH private keys, и многие другие
+- Custom правила через конфиг
+
+### Установка Gitleaks
+
+```bash
+# macOS
+brew install gitleaks
+
+# Linux
+# Скачайте бинарник с https://github.com/gitleaks/gitleaks/releases
+# Или через Nix, Docker — см. README Gitleaks
+```
+
 ## Подключение в проект
 
-### Установка пакета
+### 1. Установка пакета и хуков
 
 ```bash
 composer require --dev prikotov/git-workflow
-```
-
-### Установка хуков
-
-```bash
 php vendor/bin/git-workflow-init --hooks
 ```
 
-Команда устанавливает `commit-msg` и `pre-commit` хуки в `.git/hooks/`. Существующие хуки не перезаписываются; флаг `--force` включает перезапись.
+Флаг `--hooks` установит `pre-commit` и `commit-msg` хуки в `.git/hooks/`.
 
-Установка только документации (без хуков):
+### 2. Конфиг Gitleaks
 
-```bash
-php vendor/bin/git-workflow-init
-```
-
-### Ручной запуск
-
-Проверить staged diff без хука:
+Скопируйте шаблон конфига в корень проекта:
 
 ```bash
-vendor/bin/git-secret-guard staged
+cp vendor/prikotov/git-workflow/templates/gitleaks.toml .gitleaks.toml
 ```
 
-Проверить диапазон коммитов (CI / pre-push):
+Файл `.gitleaks.toml`:
+- Расширяет стандартный набор правил Gitleaks (`useDefault = true`)
+- Добавляет правило для Basic Auth URL (из инцидента)
+- Содержит allowlist для документации и тестов
+
+### 3. Настройте allowlist
+
+Отредактируйте `.gitleaks.toml` — добавьте проектные исключения:
+
+```toml
+[allowlist]
+paths = [
+    '''tests/fixtures/.*''',
+    '''\.example$''',
+]
+
+# Или разрешить конкретный секрет по fingerprint
+# (fingerprint показывается в выводе gitleaks при срабатывании)
+[[allowlist]]
+paths = [
+    '''config/production\.example\.yml$''',
+]
+```
+
+## Ручной запуск
 
 ```bash
-vendor/bin/git-secret-guard scan-range origin/main...HEAD
+# Проверить staged diff (pre-commit)
+gitleaks protect --staged
+
+# Проверить диапазон коммитов (CI)
+gitleaks detect --source . --log-opts="origin/main..HEAD"
 ```
-
-### Опции
-
-```
-vendor/bin/git-secret-guard staged [options]
-
-Options:
-  --config=<path>          Путь к конфигу (по умолчанию: .secret-guard.json).
-  --show-fingerprint       Показать fingerprint для allowlist.
-  --no-color               Отключить цветной вывод.
-```
-
-## Что детектируется
-
-| Правило | Паттерн | Severity |
-| :--- | :--- | :--- |
-| `basic-auth-url` | `https://user:pass@host` | high |
-| `auth-basic-header` | `Authorization: Basic <base64>` (если декодируется в `user:pass`) | high |
-| `private-key` | `-----BEGIN ... PRIVATE KEY-----` | high |
-| `env-secret` | `*_TOKEN=`, `*_SECRET=`, `*_PASSWORD=`, `API_KEY=` | medium |
-
-### Известные placeholder-ы не блокируются
-
-Следующие паттерны **не** считаются секретами:
-
-- **URL**: `https://user:pass@example.com`, `https://user:password@localhost`
-- **Env**: пустые значения, `$VAR`, `${VAR}`, `<value>`, `changeme`, `TODO`, значения короче 4 символов
-
-## Allowlist (исключения)
-
-Создайте `.secret-guard.json` в корне репозитория:
-
-```json
-{
-  "allowlist": [
-    {
-      "description": "Пример placeholder URL в документации",
-      "path": "docs/api.md",
-      "fingerprint": "sha256:abc123..."
-    },
-    {
-      "description": "Тестовые фикстуры",
-      "path": "tests/fixtures/*"
-    }
-  ]
-}
-```
-
-### Типы записей
-
-| Поле | Описание |
-| :--- | :--- |
-| `path` + `fingerprint` | Разрешить конкретное срабатывание в файле |
-| `path` (без `fingerprint`) | Разрешить все срабатывания в файле (glob) |
-| `path` + `rule` | Разрешить конкретное правило в файле |
-
-### Как получить fingerprint
-
-```bash
-vendor/bin/git-secret-guard staged --show-fingerprint
-```
-
-Fingerprint — SHA256-хеш от `rule_id:file_path:line_content`. Секрет не хранится в конфиге.
-
-## Exit-коды
-
-| Код | Значение |
-| :--- | :--- |
-| `0` | Секреты не найдены |
-| `1` | Найдены потенциальные секреты |
-| `2` | Ошибка сканера или конфига |
 
 ## CI — второй уровень защиты
 
-Pre-commit hook можно обойти через `--no-verify`. Рекомендуется второй слой:
+Pre-commit hook можно обойти через `--no-verify`. Рекомендуется второй слой в CI.
 
-### Вариант: scan-range в CI
+### Gitleaks в GitHub Actions
 
 ```yaml
-# .github/workflows/secret-scan.yml
 name: Secret Scan
 on: [push, pull_request]
 jobs:
-  scan:
+  gitleaks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-      - run: composer install --dev
-      - run: vendor/bin/git-secret-guard scan-range origin/main...HEAD
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
 ```
 
-### Вариант: Gitleaks / TruffleHog
+### TruffleHog в CI (альтернатива)
 
-Для более полного покрытия рекомендуется подключить зрелый сканер в CI:
+[TruffleHog](https://github.com/trufflesecurity/trufflehog) — дополняет Gitleaks верификацией секретов (проверяет, живой ли ключ через API). Рекомендуется для дополнительного слоя в CI:
 
-- [Gitleaks](https://github.com/gitleaks/gitleaks) — широкий набор правил
-- [TruffleHog](https://github.com/trufflesecurity/trufflehog) — проверка с верификацией
-
-`git-secret-guard` — быстрый первый слой; Gitleaks/TruffleHog — полный второй слой в CI.
+```yaml
+- name: TruffleHog Scan
+  uses: trufflesecurity/trufflehog@main
+  with:
+    extra_args: --only-verified
+```
 
 ## Что делать при срабатывании
 
@@ -160,10 +125,12 @@ jobs:
 
 - Проверяется только staged diff (не весь репозиторий) — для скорости.
 - `--no-verify` обходит hook — используйте CI / GitHub Push Protection как второй слой.
-- Самописный scanner имеет меньше coverage, чем Gitleaks/TruffleHog — рекомендуется гибридный подход.
+- Gitleaks не верифицирует секреты (чистый regex) — для верификации используйте TruffleHog в CI.
 
 ## Ссылки
 
+- [Gitleaks](https://github.com/gitleaks/gitleaks) — основной инструмент
+- [TruffleHog](https://github.com/trufflesecurity/trufflehog) — верификация секретов в CI
+- [GitHub Secret Scanning](https://docs.github.com/en/code-security/secret-scanning)
 - [Коммиты](commits.md)
 - [Pull Request](pull-request.md)
-- [Релизы](release.md)

@@ -23,16 +23,17 @@
 
 ---
 
-## Secret Guard
+## Secret Scanning
 
-Пакет включает `git-secret-guard` — pre-commit scanner для защиты от утечки секретов:
+Пакет поставляет pre-commit hook для [Gitleaks](https://github.com/gitleaks/gitleaks) — зрелого OSS-сканера секретов с 100+ правилами детекции (AWS, GitHub, GCP, JWT, SSH и др.).
 
 ```bash
-# Проверить staged diff
-vendor/bin/git-secret-guard staged
+# Установить Gitleaks
+brew install gitleaks  # macOS
 
-# Установить pre-commit hook
-cp vendor/prikotov/git-workflow/hooks/pre-commit .git/hooks/pre-commit
+# Установить хуки и конфиг
+php vendor/bin/git-workflow-init --hooks
+cp vendor/prikotov/git-workflow/templates/gitleaks.toml .gitleaks.toml
 ```
 
 Детали: [`docs/git-workflow/secrets.md`](docs/git-workflow/secrets.md).

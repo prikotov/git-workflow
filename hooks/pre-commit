@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ── Pre-commit hook: scan staged diff for secrets ──────────────────────────
+# ── Pre-commit hook: scan staged diff for secrets via Gitleaks ─────────────
 #
 # Install:
-#   cp vendor/prikotov/git-workflow/hooks/pre-commit .git/hooks/pre-commit
-#
-# Or via init script (recommended):
 #   php vendor/bin/git-workflow-init --hooks
+#
+# Requirements:
+#   Gitleaks must be installed: https://github.com/gitleaks/gitleaks
 #
 # Skip temporarily:
 #   git commit --no-verify
 #
 # Note: --no-verify bypasses this hook. Use pre-push or CI as a second layer.
 
-if [ ! -f "vendor/bin/git-secret-guard" ]; then
-    echo "git-secret-guard: skipping (vendor/bin/git-secret-guard not found)"
+if ! command -v gitleaks &>/dev/null; then
+    echo "gitleaks: skipping (not installed). See https://github.com/gitleaks/gitleaks"
     exit 0
 fi
 
-vendor/bin/git-secret-guard staged
+gitleaks protect --staged

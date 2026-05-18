@@ -9,7 +9,7 @@
             "email": "prikotov@gmail.com"
         }
     ],
-    "bin": ["bin/git-workflow-init", "bin/git-secret-guard", "bin/validate-commit"],
+    "bin": ["bin/git-workflow-init", "bin/validate-commit"],
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {

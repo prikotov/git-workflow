@@ -1,0 +1,34 @@
+# Gitleaks config for git-workflow
+# Docs: https://github.com/gitleaks/gitleaks
+
+[extend]
+# Use default ruleset as base
+useDefault = true
+
+# ── Allowlist ───────────────────────────────────────────────────────────────
+# Global allowlist — paths and patterns that should never be flagged.
+# Project-specific entries should be added here.
+
+[allowlist]
+paths = [
+    # Test fixtures and examples
+    '''tests/fixtures/.*''',
+    '''\.example$''',
+    # Documentation placeholders
+    '''docs/.*\.md$''',
+]
+
+# ── Custom rules ────────────────────────────────────────────────────────────
+# Additional rules beyond the default set.
+# Default rules already cover: AWS, GitHub tokens, GCP, Stripe, JWT, etc.
+
+[[rules]]
+id = "basic-auth-url"
+description = "Basic Auth URL with credentials"
+regex = '''https?://[^\s/:@]+:[^\s/@]+@[^\s]+'''
+tags = ["key", "credentials"]
+[[rules.allowlist]]
+regexes = [
+    # Placeholder hosts
+    '''https?://[^\s/:@]+:[^\s/@]+@(example\.(com|org|net)|localhost|127\.0\.0\.1|0\.0\.0\.0)''',
+]
