@@ -12,4 +12,9 @@ set -euo pipefail
 # Skip temporarily:
 #   git commit --no-verify
 
+if [ ! -f "vendor/bin/validate-commit" ]; then
+    echo "validate-commit: skipping (vendor/bin/validate-commit not found)"
+    exit 0
+fi
+
 vendor/bin/validate-commit "$1"
