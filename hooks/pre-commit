@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ── Pre-commit hook: scan staged diff for secrets ──────────────────────────
+#
+# Install:
+#   cp vendor/prikotov/git-workflow/hooks/pre-commit .git/hooks/pre-commit
+#
+# Or via init script (recommended):
+#   php vendor/bin/git-workflow-init --hooks
+#
+# Skip temporarily:
+#   git commit --no-verify
+#
+# Note: --no-verify bypasses this hook. Use pre-push or CI as a second layer.
+
+vendor/bin/git-secret-guard staged
