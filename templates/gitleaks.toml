@@ -11,11 +11,8 @@ useDefault = true
 
 [allowlist]
 paths = [
-    # Test fixtures and examples
     '''tests/fixtures/.*''',
     '''\.example$''',
-    # Documentation placeholders
-    '''docs/.*\.md$''',
 ]
 
 # ── Custom rules ────────────────────────────────────────────────────────────
@@ -27,8 +24,8 @@ id = "basic-auth-url"
 description = "Basic Auth URL with credentials"
 regex = '''https?://[^\s/:@]+:[^\s/@]+@[^\s]+'''
 tags = ["key", "credentials"]
-[[rules.allowlist]]
+
+[rules.allowlist]
 regexes = [
-    # Placeholder hosts
     '''https?://[^\s/:@]+:[^\s/@]+@(example\.(com|org|net)|localhost|127\.0\.0\.1|0\.0\.0\.0)''',
 ]
