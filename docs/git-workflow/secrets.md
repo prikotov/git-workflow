@@ -32,14 +32,14 @@ brew install gitleaks
 
 ## Подключение в проект
 
-### 1. Установка пакета и конфига
+### 1. Установка пакета и commit-msg хука
 
 ```bash
 composer require --dev prikotov/git-workflow
 php vendor/bin/git-workflow-init --hooks
 ```
 
-Флаг `--hooks` установит `commit-msg` хук и скопирует `.gitleaks.toml` в корень проекта.
+Флаг `--hooks` установит `commit-msg` хук в `.git/hooks/`.
 
 ### 2. Подключить Gitleaks к pre-commit
 
@@ -72,9 +72,15 @@ pre-commit:
 echo 'gitleaks protect --staged' >> .husky/pre-commit
 ```
 
-### 3. Настройте allowlist
+### 3. Настройте allowlist (опционально)
 
-Отредактируйте `.gitleaks.toml` — добавьте проектные исключения:
+Gitleaks работает из коробки с дефолтным набором правил. Для кастомизации скопируйте пример конфига:
+
+```bash
+cp vendor/prikotov/git-workflow/templates/gitleaks.toml.example .gitleaks.toml
+```
+
+И отредактируйте `.gitleaks.toml` — добавьте проектные исключения:
 
 ```toml
 [allowlist]

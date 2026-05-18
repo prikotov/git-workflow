@@ -182,21 +182,6 @@ if ($hooks) {
             $hooksInstalled++;
         }
     }
-
-    // ── Copy gitleaks config template ──────────────────────────────────────
-
-    $gitleaksTemplate = $packageRoot . '/templates/gitleaks.toml';
-    $gitleaksTarget   = $targetDir . '/.gitleaks.toml';
-
-    if (file_exists($gitleaksTemplate)) {
-        if (file_exists($gitleaksTarget) && !$force) {
-            echo '  Skip     .gitleaks.toml (already exists)' . PHP_EOL;
-        } else {
-            copy($gitleaksTemplate, $gitleaksTarget);
-            $action = file_exists($gitleaksTarget) && $force ? 'Updated' : 'Copied';
-            echo "  $action  .gitleaks.toml" . PHP_EOL;
-        }
-    }
 }
 
 // ── Summary ────────────────────────────────────────────────────────────────
