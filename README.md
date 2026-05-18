@@ -17,8 +17,25 @@
 - **Релизы** — SemVer, release-ветки, CHANGELOG
 - **Деплой** — когда и как развёртывать
 - **Чеклисты** — пошаговые списки для релиза, хотфикса и деплоя
+- **Секреты** — защита от коммита токенов, паролей, ключей
 
 Полное содержание: [`docs/git-workflow/index.md`](docs/git-workflow/index.md).
+
+---
+
+## Secret Guard
+
+Пакет включает `git-secret-guard` — pre-commit scanner для защиты от утечки секретов:
+
+```bash
+# Проверить staged diff
+vendor/bin/git-secret-guard staged
+
+# Установить pre-commit hook
+cp vendor/prikotov/git-workflow/hooks/pre-commit .git/hooks/pre-commit
+```
+
+Детали: [`docs/git-workflow/secrets.md`](docs/git-workflow/secrets.md).
 
 ---
 
