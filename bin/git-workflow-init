@@ -214,7 +214,7 @@ echo "     * Pull Requests — [$docsPath/pull-request.md]($docsPath/pull-reques
 
 if (!$hooks) {
     echo PHP_EOL;
-    echo 'To install git hooks (commit-msg, pre-commit):' . PHP_EOL;
+    echo 'To install commit-msg hook:' . PHP_EOL;
     echo '  php vendor/bin/git-workflow-init --hooks' . PHP_EOL;
 }
 
@@ -222,10 +222,14 @@ if ($hooks) {
     $gitleaksCheck = exec('command -v gitleaks 2>/dev/null');
     if ($gitleaksCheck === '' || $gitleaksCheck === false) {
         echo PHP_EOL;
-        echo '⚠  Gitleaks is not installed. Pre-commit hook will be skipped until installed.' . PHP_EOL;
+        echo '⚠  Gitleaks is not installed.' . PHP_EOL;
         echo '   Install:' . PHP_EOL;
         echo '     Fedora/RHEL:  sudo dnf install gitleaks' . PHP_EOL;
         echo '     macOS:         brew install gitleaks' . PHP_EOL;
         echo '     Other:         https://github.com/gitleaks/gitleaks/releases' . PHP_EOL;
     }
+    echo PHP_EOL;
+    echo 'To add secret scanning to your pre-commit hook, add this line:' . PHP_EOL;
+    echo '  gitleaks protect --staged' . PHP_EOL;
+    echo 'Or use a hook manager (lefthook, husky) — see docs/git-workflow/secrets.md.' . PHP_EOL;
 }

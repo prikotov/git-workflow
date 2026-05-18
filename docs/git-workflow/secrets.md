@@ -20,37 +20,57 @@
 ### Установка Gitleaks
 
 ```bash
+# Fedora / RHEL
+sudo dnf install gitleaks
+
 # macOS
 brew install gitleaks
 
-# Linux
+# Другие ОС
 # Скачайте бинарник с https://github.com/gitleaks/gitleaks/releases
-# Или через Nix, Docker — см. README Gitleaks
 ```
 
 ## Подключение в проект
 
-### 1. Установка пакета и хуков
+### 1. Установка пакета и конфига
 
 ```bash
 composer require --dev prikotov/git-workflow
 php vendor/bin/git-workflow-init --hooks
 ```
 
-Флаг `--hooks` установит `pre-commit` и `commit-msg` хуки в `.git/hooks/`.
+Флаг `--hooks` установит `commit-msg` хук и скопирует `.gitleaks.toml` в корень проекта.
 
-### 2. Конфиг Gitleaks
+### 2. Подключить Gitleaks к pre-commit
 
-Скопируйте шаблон конфига в корень проекта:
+`pre-commit` хук не устанавливается автоматически — им может управлять проект (husky, lefthook, свой скрипт). Добавьте вызов Gitleaks в ваш pre-commit hook:
+
+**Вариант A: вручную в `.git/hooks/pre-commit`**
 
 ```bash
-cp vendor/prikotov/git-workflow/templates/gitleaks.toml .gitleaks.toml
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ... другие проверки ...
+
+gitleaks protect --staged
 ```
 
-Файл `.gitleaks.toml`:
-- Расширяет стандартный набор правил Gitleaks (`useDefault = true`)
-- Добавляет правило для Basic Auth URL (из инцидента)
-- Содержит allowlist для документации и тестов
+**Вариант B: через [Lefthook](https://github.com/evilmartians/lefthook) (рекомендуется)**
+
+```yaml
+# lefthook.yml
+pre-commit:
+  commands:
+    gitleaks:
+      run: gitleaks protect --staged
+```
+
+**Вариант C: через [Husky](https://typicode.github.io/husky/)**
+
+```bash
+echo 'gitleaks protect --staged' >> .husky/pre-commit
+```
 
 ### 3. Настройте allowlist
 
@@ -62,19 +82,19 @@ paths = [
     '''tests/fixtures/.*''',
     '''\.example$''',
 ]
+```
 
-# Или разрешить конкретный секрет по fingerprint
-# (fingerprint показывается в выводе gitleaks при срабатывании)
-[[allowlist]]
-paths = [
-    '''config/production\.example\.yml$''',
-]
+Или разрешите конкретное срабатывание через `.gitleaksignore` (fingerprint показывается в выводе gitleaks):
+
+```
+# .gitleaksignore
+test-leak.md:basic-auth-url:1
 ```
 
 ## Ручной запуск
 
 ```bash
-# Проверить staged diff (pre-commit)
+# Проверить staged diff
 gitleaks protect --staged
 
 # Проверить диапазон коммитов (CI)
@@ -130,6 +150,7 @@ jobs:
 ## Ссылки
 
 - [Gitleaks](https://github.com/gitleaks/gitleaks) — основной инструмент
+- [Lefthook](https://github.com/evilmartians/lefthook) — менеджер git-хуков
 - [TruffleHog](https://github.com/trufflesecurity/trufflehog) — верификация секретов в CI
 - [GitHub Secret Scanning](https://docs.github.com/en/code-security/secret-scanning)
 - [Коммиты](commits.md)

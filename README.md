@@ -25,16 +25,21 @@
 
 ## Secret Scanning
 
-Пакет поставляет pre-commit hook для [Gitleaks](https://github.com/gitleaks/gitleaks) — зрелого OSS-сканера секретов с 100+ правилами детекции (AWS, GitHub, GCP, JWT, SSH и др.).
+Пакет поставляет конфиг для [Gitleaks](https://github.com/gitleaks/gitleaks) — зрелого OSS-сканера секретов с 100+ правилами детекции (AWS, GitHub, GCP, JWT, SSH и др.).
 
 ```bash
 # Установить Gitleaks
-brew install gitleaks  # macOS
+sudo dnf install gitleaks  # Fedora/RHEL
+brew install gitleaks      # macOS
 
-# Установить хуки и конфиг
+# Установить commit-msg хук и конфиг Gitleaks
 php vendor/bin/git-workflow-init --hooks
-cp vendor/prikotov/git-workflow/templates/gitleaks.toml .gitleaks.toml
+
+# Добавить в свой pre-commit hook
+echo 'gitleaks protect --staged' >> .git/hooks/pre-commit
 ```
+
+Pre-commit hook не устанавливается автоматически — им управляет проект (lefthook, husky, свой скрипт).
 
 Детали: [`docs/git-workflow/secrets.md`](docs/git-workflow/secrets.md).
 
