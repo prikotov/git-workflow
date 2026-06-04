@@ -12,14 +12,9 @@ set -euo pipefail
 # Skip temporarily:
 #   git commit --no-verify
 
-if [ -f "Makefile" ] && grep -qE '^security:' Makefile; then
-    make --no-print-directory security
-    exit $?
-fi
-
 if ! command -v gitleaks >/dev/null 2>&1; then
     echo "gitleaks is required to scan staged changes for secrets." >&2
-    echo "Install gitleaks or add a project-specific 'security' target to Makefile." >&2
+    echo "Install gitleaks or configure a project-specific hook manager." >&2
     exit 1
 fi
 

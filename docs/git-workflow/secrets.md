@@ -45,8 +45,11 @@ php vendor/bin/git-workflow-init --hooks
 
 `pre-commit` хук проверяет только staged changes — ровно то, что попадёт в commit.
 
-- если в проекте есть `Makefile` с target `security`, запускается `make security`;
-- иначе запускается `gitleaks protect --staged` напрямую.
+Команда запускается детерминированно:
+
+```bash
+gitleaks protect --staged --redact --no-banner --log-level warn
+```
 
 Если проект использует свой hook manager (lefthook, husky), можно подключить ту же команду вручную.
 
@@ -57,13 +60,13 @@ php vendor/bin/git-workflow-init --hooks
 pre-commit:
   commands:
     gitleaks:
-      run: gitleaks protect --staged
+      run: gitleaks protect --staged --redact --no-banner --log-level warn
 ```
 
 **Husky**
 
 ```bash
-echo 'gitleaks protect --staged' >> .husky/pre-commit
+echo 'gitleaks protect --staged --redact --no-banner --log-level warn' >> .husky/pre-commit
 ```
 
 ### 3. Настройте allowlist (опционально)

@@ -215,6 +215,5 @@ if ($hooks) {
     }
     echo PHP_EOL;
     echo 'pre-commit hook scans staged changes for secrets.' . PHP_EOL;
-    echo 'If Makefile has a security target, the hook runs `make security`.' . PHP_EOL;
-    echo 'Otherwise it runs `gitleaks protect --staged` directly.' . PHP_EOL;
+    echo 'It runs `gitleaks protect --staged` directly.' . PHP_EOL;
 }

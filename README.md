@@ -38,7 +38,7 @@ php vendor/bin/git-workflow-init --hooks
 # (опционально) Кастомный конфиг — пример в templates/gitleaks.toml.example
 ```
 
-Pre-commit hook проверяет staged changes: если в проекте есть `make security`, запускает его; иначе запускает `gitleaks protect --staged` напрямую.
+Pre-commit hook детерминированно проверяет staged changes через `gitleaks protect --staged`.
 
 Детали: [`docs/git-workflow/secrets.md`](docs/git-workflow/secrets.md).
 
