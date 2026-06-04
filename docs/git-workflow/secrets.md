@@ -32,44 +32,41 @@ brew install gitleaks
 
 ## Подключение в проект
 
-### 1. Установка пакета и commit-msg хука
+### 1. Установка пакета и git hooks
 
 ```bash
 composer require --dev prikotov/git-workflow
 php vendor/bin/git-workflow-init --hooks
 ```
 
-Флаг `--hooks` установит `commit-msg` хук в `.git/hooks/`.
+Флаг `--hooks` установит `commit-msg` и `pre-commit` хуки в `.git/hooks/`.
 
-### 2. Подключить Gitleaks к pre-commit
+### 2. Как работает pre-commit
 
-`pre-commit` хук не устанавливается автоматически — им может управлять проект (husky, lefthook, свой скрипт). Добавьте вызов Gitleaks в ваш pre-commit hook:
+`pre-commit` хук проверяет только staged changes — ровно то, что попадёт в commit.
 
-**Вариант A: вручную в `.git/hooks/pre-commit`**
+Команда запускается детерминированно:
 
 ```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-# ... другие проверки ...
-
-gitleaks protect --staged
+gitleaks protect --staged --redact --no-banner --log-level warn
 ```
 
-**Вариант B: через [Lefthook](https://github.com/evilmartians/lefthook) (рекомендуется)**
+Если проект использует свой hook manager (lefthook, husky), можно подключить ту же команду вручную.
+
+**Lefthook**
 
 ```yaml
 # lefthook.yml
 pre-commit:
   commands:
     gitleaks:
-      run: gitleaks protect --staged
+      run: gitleaks protect --staged --redact --no-banner --log-level warn
 ```
 
-**Вариант C: через [Husky](https://typicode.github.io/husky/)**
+**Husky**
 
 ```bash
-echo 'gitleaks protect --staged' >> .husky/pre-commit
+echo 'gitleaks protect --staged --redact --no-banner --log-level warn' >> .husky/pre-commit
 ```
 
 ### 3. Настройте allowlist (опционально)

@@ -32,16 +32,13 @@
 sudo dnf install gitleaks  # Fedora/RHEL
 brew install gitleaks      # macOS
 
-# Установить commit-msg хук
+# Установить commit-msg и pre-commit хуки
 php vendor/bin/git-workflow-init --hooks
-
-# Добавить в свой pre-commit hook
-echo 'gitleaks protect --staged' >> .git/hooks/pre-commit
 
 # (опционально) Кастомный конфиг — пример в templates/gitleaks.toml.example
 ```
 
-Pre-commit hook не устанавливается автоматически — им управляет проект (lefthook, husky, свой скрипт).
+Pre-commit hook детерминированно проверяет staged changes через `gitleaks protect --staged`.
 
 Детали: [`docs/git-workflow/secrets.md`](docs/git-workflow/secrets.md).
 
