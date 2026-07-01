@@ -12,7 +12,10 @@ declare(strict_types=1);
  *   target-dir   — project root (default: current working directory).
  *   --docs-path  — relative path where docs will be copied (default: docs/git-workflow/).
  *   --hooks      — install git hooks (commit-msg, pre-commit) into .git/hooks/.
- *   --force      — overwrite existing files with fresh copies from the package.
+ *   --force      — overwrite existing files (docs/hooks/workflows) with fresh copies.
+ *
+ * By default also copies GitHub Actions workflows from templates/workflows/
+ * into .github/workflows/ of the target project (e.g. secret-scan-pr-content.yml).
  */
 
 // ── Parse arguments ────────────────────────────────────────────────────────
@@ -184,12 +187,58 @@ if ($hooks) {
     }
 }
 
+// ── Install GitHub Actions workflows ──────────────────────────────────────
+
+$workflowsInstalled = 0;
+$workflowsSkipped   = 0;
+
+$sourceWorkflows    = $packageRoot . '/templates/workflows';
+$targetWorkflowsDir = $targetDir . '/.github/workflows';
+
+if (!is_dir($sourceWorkflows)) {
+    fwrite(STDERR, "  Warning: templates/workflows/ directory not found in package." . PHP_EOL);
+} else {
+    if (!is_dir($targetWorkflowsDir)) {
+        mkdir($targetWorkflowsDir, 0755, true);
+    }
+
+    $workflowFiles = glob($sourceWorkflows . '/*.yml');
+    if ($workflowFiles === []) {
+        fwrite(STDERR, '  Warning: no workflow templates found in templates/workflows/.' . PHP_EOL);
+    }
+
+    foreach ($workflowFiles as $workflowFile) {
+        if (!is_file($workflowFile)) {
+            continue;
+        }
+
+        $workflowName   = basename($workflowFile);
+        $targetWorkflow = $targetWorkflowsDir . '/' . $workflowName;
+
+        if (file_exists($targetWorkflow) && !$force) {
+            echo "  Skip     .github/workflows/$workflowName (already exists)" . PHP_EOL;
+            $workflowsSkipped++;
+            continue;
+        }
+
+        $existedBefore = file_exists($targetWorkflow);
+        copy($workflowFile, $targetWorkflow);
+
+        $action = $existedBefore ? 'Updated' : 'Installed';
+        echo "  $action  .github/workflows/$workflowName" . PHP_EOL;
+        $workflowsInstalled++;
+    }
+}
+
 // ── Summary ────────────────────────────────────────────────────────────────
 
 echo PHP_EOL;
 echo "Done. $copied copied, $updated updated, $skipped skipped." . PHP_EOL;
 if ($hooks) {
     echo "Hooks: $hooksInstalled installed, $hooksSkipped skipped." . PHP_EOL;
+}
+if ($workflowsInstalled > 0 || $workflowsSkipped > 0) {
+    echo "Workflows: $workflowsInstalled installed, $workflowsSkipped skipped." . PHP_EOL;
 }
 echo PHP_EOL;
 echo "Next steps:" . PHP_EOL;

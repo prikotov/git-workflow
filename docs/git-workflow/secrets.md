@@ -136,6 +136,36 @@ jobs:
     extra_args: --only-verified
 ```
 
+## Сканирование PR-body и комментариев (gap: контент вне git)
+
+Pre-commit hook и GitHub Push Protection работают только на **git-контент** (staged diff → commit → push). Но PR-body, PR-комментарии и issue-комментарии живут в **GitHub API вне git**: их можно отредактировать через `gh pr edit`, веб-UI или API — и эти слои их **не увидят**. Единственный серверный слой (GitHub Secret Scanning) срабатывает **после** того, как секрет уже публично виден.
+
+Этот gap закрывает workflow `secret-scan-pr-content.yml`: на `opened/edited/reopened` PR и при создании/редактировании комментариев он собирает title + body + comments и гоняет на них gitleaks.
+
+### Установка (поставляется с пакетом)
+
+```bash
+composer require --dev prikotov/git-workflow
+php vendor/bin/git-workflow-init
+```
+
+`git-workflow-init` копирует `templates/workflows/secret-scan-pr-content.yml` → `.github/workflows/` проекта. Файл идемпотентен: повторный запуск без `--force` пропускает существующий, с `--force` — перезаписывает свежей версией из пакета.
+
+### Обновление
+
+```bash
+composer update prikotov/git-workflow
+php vendor/bin/git-workflow-init --force
+```
+
+### Как это безопасно собирает контент
+
+Title/body/comments читаются через `gh api ... --jq` и пишутся **в файл** (`scan/pr-meta.txt`), а затем сканируются gitleaks (`--no-git --redact`). Контент **никогда не интерполируется в shell-команду** через `${{ ... }}` — иначе markdown/backticks/кавычки в PR-body ломают шаг (script injection). `--redact` гарантирует, что CI-лог не станет источником утечки.
+
+### Настройка allowlist
+
+Используется `.gitleaks.toml` проекта (если есть) — общий с pre-commit, см. [выше](#2-настройте-allowlist-опционально). Если `.gitleaks.toml` отсутствует — применяются встроенные rules gitleaks.
+
 ## Что делать при срабатывании
 
 1. **До commit** (сканер сработал) — удалите секрет из staged diff, используйте переменные окружения или vault.

@@ -8,12 +8,14 @@ depends_on: []
 epic:
 author:
 assignee:
-branch:
+branch: task/secret-scan-pr-content
 pr:
-status: backlog
+status: done
 ---
 
 # TASK-secret-scan-pr-content: CI-сканирование PR-body/comments на секреты через git-workflow-init
+
+> **⚠️ Упрощение по решению владельца (2026-07-01):** реализован **Вариант A в упрощённой форме** — копирование workflow через `git-workflow-init` как docs (идемпотентность + `--force`). **`--sync` и маркер источника ОТКЛОНЕНЫ** ради единой схемы подключения (`composer update` + `git-workflow-init --force`). Дополнительно закрыт script-injection: PR-body собирается через `gh api → файл`, а не `echo "${{ body }}"` (markdown/кавычки в body больше не ломают шаг). DoD ниже актуализирован по факту реализации.
 
 ## 1. Concept and Goal (Концепция и Цель)
 
