@@ -10,7 +10,7 @@ author: Тимлид (Алекс)
 assignee: Технический писатель (Гермиона)
 branch: task/docs-done-before-approval
 pr: https://github.com/prikotov/git-workflow/pull/8
-status: done
+status: review
 ---
 
 # TASK-docs-prevent-post-approval-push: Правило done-sync до approve (исключить post-approval push в PR)
@@ -125,3 +125,4 @@ status: done
 | :--- | :--- | :--- |
 | 2026-07-28 | Тимлид (Алекс) | Создание задачи после инцидента post-approval push в `task-orchestrator` PR #331. |
 | 2026-08-21 | Технический писатель (Гермиона) | Приоритет P1 (P0 из ретро `task-orchestrator` 2026-08-21, одобрено владельцем). Контекст: инциденты #362/#363/#364. Must Have: цикл возврата из `done`, маркировка `package`. Статус `in_progress`, ветка `task/docs-done-before-approval`. |
+| 2026-08-21 | Технический писатель (Гермиона) | Возвращена в `review` по замечанию владельца (убрать заметку о `package` из README), затем повторный done-sync. |
