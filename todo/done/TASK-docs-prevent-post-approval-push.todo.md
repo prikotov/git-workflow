@@ -10,7 +10,7 @@ author: Тимлид (Алекс)
 assignee: Технический писатель (Гермиона)
 branch: task/docs-done-before-approval
 pr: https://github.com/prikotov/git-workflow/pull/8
-status: review
+status: done
 ---
 
 # TASK-docs-prevent-post-approval-push: Правило done-sync до approve (исключить post-approval push в PR)
