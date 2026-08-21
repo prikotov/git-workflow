@@ -9,8 +9,8 @@ epic:
 author: Тимлид (Алекс)
 assignee: Технический писатель (Гермиона)
 branch: task/docs-done-before-approval
-pr:
-status: in_progress
+pr: https://github.com/prikotov/git-workflow/pull/8
+status: done
 ---
 
 # TASK-docs-prevent-post-approval-push: Правило done-sync до approve (исключить post-approval push в PR)
