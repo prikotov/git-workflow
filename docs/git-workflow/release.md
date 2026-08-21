@@ -1,3 +1,7 @@
+---
+package: prikotov/git-workflow
+---
+
 # Релизы и CHANGELOG
 
 Этот гайд фиксирует release model проекта TasK: `master` как integration branch, одна active `release/x.y`, production deploy по immutable `tag` `vX.Y.Z`.

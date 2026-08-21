@@ -1,3 +1,7 @@
+---
+package: prikotov/git-workflow
+---
+
 # Запрос на слияние (Pull Request)
 
 **Pull Request (PR)** — предложенный набор изменений из рабочей ветки в целевую ветку (`master` или активную `release/x.y`), проходящий проверки и `Code Review`.

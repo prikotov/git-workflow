@@ -1,3 +1,7 @@
+---
+package: prikotov/git-workflow
+---
+
 # Защита от коммита секретов (Secret Scanning)
 
 **Secret scanning** — автоматическая проверка staged diff на наличие секретов (токены, пароли, ключи) до создания commit.
