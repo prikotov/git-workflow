@@ -1,3 +1,7 @@
+---
+package: prikotov/git-workflow
+---
+
 # Ревью кода (Code Review)
 
 **Ревью кода (Code Review)** — процесс проверки изменений в `Pull Request`, цель которого:

@@ -1,3 +1,7 @@
+---
+package: prikotov/git-workflow
+---
+
 # Работа с Git (Git workflow)
 
 **Git workflow** — набор документов о правилах работы с `branch`/`commit`/`Pull Request` и связанных процессах.
