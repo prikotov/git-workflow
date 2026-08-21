@@ -21,6 +21,8 @@
 
 Полное содержание: [`docs/git-workflow/index.md`](docs/git-workflow/index.md).
 
+Распределяемые документы начинаются с front matter `package: prikotov/git-workflow` — атрибуция источника; генераторы без поддержки front matter отрисуют его как текст.
+
 ---
 
 ## Secret Scanning
