@@ -9,8 +9,8 @@ epic:
 author: Тимлид (Алекс)
 assignee: Тимлид (Алекс)
 branch: task/document-semver-zero-major
-pr:
-status: review
+pr: https://github.com/prikotov/git-workflow/pull/9
+status: done
 ---
 
 # TASK-document-semver-zero-major: Уточнить выбор версии для несовместимых изменений в 0.x
