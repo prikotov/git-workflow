@@ -47,11 +47,10 @@ docs/
     release.md               # SemVer, модель релизов, CHANGELOG
     deploy.md                # Правила деплоя
     release-checklists.md    # Чеклисты для релиза, hotfix, деплоя
-    releases/                # Артефакты релиза
+    releases/                # Описание артефактов релиза
       index.md
-      templates/release-plan.template.md
     templates/
-      release-plan.template.md
+      release-plan.template.md  # Шаблон плана релиза
 todo/                        # Внутренние задачи по доработке пакета
 ```
 

@@ -4,12 +4,12 @@ package: prikotov/git-workflow
 
 # Артефакты релиза
 
-Этот раздел хранит документы, которые создаются для конкретного production релиза.
+Этот раздел описывает документы, которые создаются для конкретного production релиза.
 
 ## Структура
 
-- `templates/release-plan.template.md` — шаблон плана релиза.
-- `vX.Y.Z/release-plan.md` — заполненный план релиза для конкретного тега релиза.
+- `docs/git-workflow/templates/release-plan.template.md` — шаблон плана релиза.
+- `docs/releases/vX.Y.Z/release-plan.md` — заполненный план релиза для конкретного тега релиза.
 
 ## Правила
 
@@ -20,4 +20,4 @@ package: prikotov/git-workflow
 
 ## Шаблон
 
-- [Шаблон плана релиза](templates/release-plan.template.md)
+- [Шаблон плана релиза](../templates/release-plan.template.md)

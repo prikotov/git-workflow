@@ -84,7 +84,7 @@ git push -u origin release/x.y
 
 ```bash
 mkdir -p docs/releases/vX.Y.Z
-cp docs/releases/templates/release-plan.template.md docs/releases/vX.Y.Z/release-plan.md
+cp docs/git-workflow/templates/release-plan.template.md docs/releases/vX.Y.Z/release-plan.md
 ```
 
 В `release-plan.md` обязательно зафиксируйте:
