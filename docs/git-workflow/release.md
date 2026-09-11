@@ -4,13 +4,14 @@ package: prikotov/git-workflow
 
 # Релизы и CHANGELOG
 
-Этот гайд фиксирует release model проекта TasK: `master` как integration branch, одна active `release/x.y`, production deploy по immutable `tag` `vX.Y.Z`.
+Этот гайд фиксирует модель релизов (release model) проекта-потребителя: `master` как integration branch, одна active `release/x.y`, production deploy по immutable `tag` `vX.Y.Z`.
 
 ## Release model
 
 - `master` содержит текущую интеграцию задач и может опережать production.
 - Перед production выпуском из выбранного commit в `master` создаётся `release/x.y`.
-- В `release/x.y` допускаются только stabilizing changes: bugfix, release docs, безопасные мелкие правки.
+- В `release/x.y` допускаются только stabilizing changes: bugfix, release docs, безопасные мелкие правки — через PR из рабочих веток.
+- Прямые коммиты в `master` и `release/*` запрещены; релизные файлы готовятся в `task/*` от активной `release/x.y`.
 - Production всегда разворачивается по **конкретному tag**, а не по branch head.
 - Одновременно поддерживается только одна active `release/x.y`.
 
@@ -31,30 +32,24 @@ package: prikotov/git-workflow
 
 Несовместимость в версии `0.x` обязательно отмечается в `CHANGELOG.md` и плане релиза, хотя повышает `minor`, а не `major`. Если релиз содержит изменения разных типов, выбирается наибольшее требуемое повышение версии.
 
-Тип релиза определяется по истории Conventional Commits: `fix` требует `patch`, `feat` — `minor`, а `BREAKING CHANGE` или `!` — `minor` при текущей версии `0.x` и `major` начиная с `1.0.0`. В спорных случаях используйте явные `make release-*`.
+Тип релиза определяется по истории Conventional Commits: `fix` требует `patch`, `feat` — `minor`, а `BREAKING CHANGE` или `!` — `minor` при текущей версии `0.x` и `major` начиная с `1.0.0`. Выбранную версию явно передавайте генератору; его автоматическое повышение не заменяет эти правила, особенно для `0.x`.
 
 - `patch` сохраняет текущую release line.
 - `minor` и `major` открывают новую `release/x.y`.
 
 ## Подготовка коммитов
 
-Используйте интерактивный помощник:
+Сообщения готовьте вручную по [правилам коммитов](commits.md): Conventional Commits, английский и русский текст через косую черту. Это относится и к релизным коммитам; обязательного помощника нет.
 
 ```bash
-make prepare-commit
-```
-
-Если helper падает, сформируйте заголовок вручную по Conventional Commits:
-
-```bash
-git commit -m "type(scope): description"
+git commit -m "chore(release): prepare vX.Y.Z / подготовить vX.Y.Z"
 ```
 
 Примеры:
-- `feat(auth): add OAuth2 login for Google`
-- `fix(ui): align submit button on mobile`
-- `docs(release): describe hotfix merge-back`
-- `feat!: remove legacy v1 endpoints`
+- `feat(auth): add OAuth2 login for Google / добавить вход через Google OAuth2`
+- `fix(ui): align submit button on mobile / выровнять кнопку отправки на мобильных устройствах`
+- `docs(release): describe hotfix merge-back / описать возврат срочного исправления`
+- `feat(api)!: remove legacy v1 endpoints / удалить устаревшие эндпоинты v1`
 
 ## Release cut
 
@@ -62,7 +57,7 @@ git commit -m "type(scope): description"
 
 ```bash
 git switch master
-git pull origin master
+git pull --ff-only origin master
 git switch -c release/x.y
 git push -u origin release/x.y
 ```
@@ -74,13 +69,13 @@ git push -u origin release/x.y
 
 ## План релиза
 
-Для каждого production release перед deploy создаётся документ `docs/releases/vX.Y.Z/release-plan.md`.
+Для каждого production release в рабочей ветке подготовки, до одобрения PR и создания тега, создаётся документ `docs/releases/vX.Y.Z/release-plan.md`.
 
 - место хранения: `docs/releases/`;
 - шаблон: [release-plan.template.md](./templates/release-plan.template.md).
 - без заполненного `release-plan.md` deploy не начинается.
 
-Базовое создание документа после определения тега релиза:
+В `task/*` от активной `release/x.y`, после выбора версии (тег ещё не создан):
 
 ```bash
 mkdir -p docs/releases/vX.Y.Z
@@ -96,73 +91,74 @@ cp docs/git-workflow/templates/release-plan.template.md docs/releases/vX.Y.Z/rel
 
 ## Работа с CHANGELOG
 
-Для предпросмотра изменений:
+Генерируйте файлы только в рабочей ветке подготовки релиза. Если проект использует `marcocesarato/php-conventional-changelog`, документированный вызов без автоматического коммита и тега:
 
 ```bash
-make changelog
-git diff CHANGELOG.md
+php vendor/bin/conventional-changelog --ver="X.Y.Z" --no-tag --merged
+git diff
 ```
+
+- Замените `X.Y.Z` выбранной версией без префикса `v`; `--merged` ограничивает историю коммитами, достижимыми из `HEAD`.
+- Не используйте `--commit`, `--commit-all` или `--amend`. Проверьте конфигурацию `.changelog` и её callbacks: они тоже не должны создавать коммиты, теги или выполнять публикацию.
+- Команда записывает файлы, это не dry run. Проверьте весь diff: кроме `CHANGELOG.md` могут измениться файлы версий (`composer.json`, `package.json` и другие по конфигурации).
+- Если генератор не установлен, подготовьте файлы вручную по тем же правилам. Этот пакет не поставляет генератор или цели `make release-*`.
+- Не запускайте обёртки `make release`, `make release-*` или `make changelog`, пока не проверены их действия. Автоматический релизный коммит/тег не входит в этот процесс.
 
 `CHANGELOG.md` должен оставаться коротким:
 - заголовок релиза;
 - compare link;
-- одна короткая summary-строка.
+- одна короткая summary-строка;
+- явное указание несовместимости, если она есть, включая версии `0.x`.
 
 Подробные notes публикуются в GitHub Release.
 
 ## Выпуск релиза
 
-Перед релизом:
+### 1. Подготовка файлов через PR
+
+После стабилизации создайте рабочую ветку от активной линии:
 
 ```bash
-make check
-make tests-e2e
+git switch release/x.y
+git pull --ff-only origin release/x.y
+git switch -c task/prepare-release-x-y-z
 ```
 
-Релиз выполняется **на active `release/x.y`**, а не на `master`.
+1. Выберите версию по SemVer, подготовьте `CHANGELOG.md`, файлы версий и `docs/releases/vX.Y.Z/release-plan.md` в этой ветке.
+2. Проверьте diff и создайте коммит вручную по [commits.md](commits.md).
+3. Откройте PR из `task/*` в `release/x.y` по [правилам PR](pull-request.md). Не синхронизируйте эту рабочую ветку с `master`.
+4. Завершите все правки, включая служебные обновления задачи, до окончательных проверок и одобрения. Для релиза обязательны `make check` и `make tests-e2e`; исключения или замены допустимы только по [явной политике потребителя](pull-request.md#обязательные-проверки).
+5. Дождитесь зелёного CI, одобрения окончательного состояния PR и подтверждения merge пользователем; выполните merge через GitHub. После одобрения никаких новых коммитов без повторных проверок и нового одобрения.
 
-Вариант A — patch по умолчанию:
+### 2. Проверка слитого коммита и создание тега
+
+- Зафиксируйте полный SHA коммита, полученного после merge PR в `release/x.y` (при squash это новый SHA), а не SHA рабочей ветки.
+- Получите актуальную целевую ветку и убедитесь, что выбранный SHA принадлежит ей. Проверьте состав релиза и все релизные файлы на этом SHA.
+- Проведите обязательные релизные проверки и дождитесь зелёного CI **именно для этого слитого SHA**. Проверки PR до merge не заменяют проверку результата слияния.
+- Если нужны исправления — новый `task/*` от `release/x.y`, новый PR, проверки и одобрение; тег пока не создавайте.
+- Если линия сдвинулась, не подменяйте проверенный SHA текущим head: заново согласуйте состав и проверьте выбранный коммит.
+
+Только после этих проверок и разрешения на выпуск создайте тег на зафиксированном SHA. В примере замените `VERIFIED_MERGED_SHA` полным проверенным SHA, а `X.Y.Z` — выбранной версией:
 
 ```bash
-make release
+release_commit=VERIFIED_MERGED_SHA
+git tag -a vX.Y.Z "$release_commit" -m "Release vX.Y.Z"
+git push --no-follow-tags origin refs/tags/vX.Y.Z:refs/tags/vX.Y.Z
 ```
 
-Вариант B — явный тип:
+- Публикуется только конкретный тег, не все локальные теги; `git push --tags` запрещён.
+- Тег production неизменяем: не перемещайте, не перезаписывайте и не публикуйте его с `--force`.
+- На защищённой ветке не создаётся дополнительный релизный коммит; генератор после merge не запускается.
+
+### 3. GitHub Release
+
+Убедитесь, что опубликованный тег указывает на проверенный SHA. Создайте GitHub Release только для уже существующего удалённого тега:
 
 ```bash
-make release-patch
-make release-minor
-make release-major
+gh release create vX.Y.Z --verify-tag --notes-file tmp/release-vX.Y.Z.md
 ```
 
-Что делает release команда:
-- обновляет `CHANGELOG.md`;
-- определяет или принимает версию;
-- делает release commit;
-- создаёт git tag `vX.Y.Z`.
-
-После генерации:
-1. проверьте `CHANGELOG.md`;
-2. создайте и заполните `docs/releases/vX.Y.Z/release-plan.md`;
-3. если блок слишком длинный, вынесите подробности в GitHub Release notes;
-4. запушьте release branch и tags:
-
-```bash
-git push origin release/x.y
-git push origin --tags
-```
-
-5. создайте GitHub Release:
-
-```bash
-gh release create vX.Y.Z --notes-file tmp/release-vX.Y.Z.md
-```
-
-или
-
-```bash
-gh release create vX.Y.Z --generate-notes
-```
+Или используйте `--generate-notes` вместо `--notes-file`. Подробные notes подготовьте до публикации; `--verify-tag` не позволяет неявно создать отсутствующий тег. Деплой выполняется только по этому фиксированному тегу.
 
 ## Hotfix и patch release
 
@@ -172,11 +168,11 @@ gh release create vX.Y.Z --generate-notes
 1. определить текущий production tag `vX.Y.Z`;
 2. создать `hotfix/x.y.z-<short-description>` от этого tag;
 3. исправить проблему и провести обязательные проверки;
-4. влить hotfix в active `release/x.y`;
-5. выпустить patch release `vX.Y.(Z+1)`;
-6. выполнить merge-back hotfix changes в `master`.
+4. влить hotfix через одобренный PR в active `release/x.y`;
+5. подготовить patch release `vX.Y.(Z+1)` в `task/*` от этой линии и выпустить по описанному выше процессу PR → проверка слитого SHA → конкретный тег;
+6. выполнить merge-back hotfix changes в `master` отдельным PR из рабочей ветки.
 
-Если active `release/x.y` уже закрыта, hotfix всё равно стартует от production tag, а merge-back в `master` делается отдельным PR сразу после patch release.
+Если production line уже закрыта, восстановите `release/x.y` от текущего production tag и направьте hotfix PR в неё. При наличии другой активной линии сначала согласуйте её закрытие: две активные линии запрещены. Далее действует тот же порядок подготовки файлов через PR и тега после проверки слитого коммита; merge-back в `master` — отдельным PR сразу после patch release.
 
 ## Recovery Policy
 

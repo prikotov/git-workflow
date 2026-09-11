@@ -47,11 +47,19 @@ package: prikotov/git-workflow
 
 ### Task branch
 
-Используется для обычной разработки и документации.
+Для обычной разработки и документации база и цель PR — `master`.
 
 ```bash
 git switch master
-git pull origin master
+git pull --ff-only origin master
+git switch -c task/<short-description>
+```
+
+Для стабилизации и подготовки релизных файлов база и цель PR — активная `release/x.y`:
+
+```bash
+git switch release/x.y
+git pull --ff-only origin release/x.y
 git switch -c task/<short-description>
 ```
 
@@ -61,7 +69,7 @@ git switch -c task/<short-description>
 
 ```bash
 git switch master
-git pull origin master
+git pull --ff-only origin master
 git switch -c release/x.y
 git push -u origin release/x.y
 ```
@@ -84,20 +92,32 @@ git switch -c hotfix/x.y.z-<short-description> vX.Y.Z
 
 ## Синхронизация
 
-- `task/*` синхронизируется с `master`.
-- `release/*` синхронизируется только с собственной release line; новые feature commits из `master` туда не подтягиваются автоматически.
+- `task/*` синхронизируется со своей базой: `master` для обычной разработки, активной `release/x.y` для стабилизации и подготовки релиза.
+- База синхронизации совпадает с целью PR; не подтягивай `master` в рабочую ветку релиза.
+- Локальная `release/*` обновляется только из одноимённой ветки `origin` через `--ff-only`; изменения в неё поступают через PR, новые feature commits из `master` не подтягиваются.
 - `hotfix/*` после merge должен присутствовать в active `release/x.y` и в `master`.
 - Если не уверен, использовать `merge` или `rebase`, — уточни у пользователя.
 
-```bash
-git fetch origin
-git merge origin/master
-```
+В рабочей ветке выбери базу и получи её актуальное состояние:
 
 ```bash
+base=master # Для стабилизации и подготовки релиза: base=release/x.y
 git fetch origin
-git rebase origin/master
 ```
+
+Затем используй **один** согласованный способ — merge:
+
+```bash
+git merge "origin/$base"
+```
+
+Или rebase:
+
+```bash
+git rebase "origin/$base"
+```
+
+Синхронизацию заверши до окончательного одобрения PR. Если после одобрения нужны изменения — повтори проверки и запроси новое одобрение по [правилам PR](pull-request.md#подготовка-pr).
 
 ## Завершение
 
