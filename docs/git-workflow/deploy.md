@@ -16,7 +16,7 @@ package: prikotov/git-workflow
 ## Правила
 
 - Production deploy выполняется только по **конкретному release tag** `vX.Y.Z`.
-- Деплой из `master` или `release/x.y` branch head запрещён.
+- Выкладка из вершины ветки запрещена.
 - Если релиз включает миграции — деплой должен учитывать порядок действий и риски.
 - Production incidents после деплоя закрываются через hotfix или patch release, а не через rollback.
 
