@@ -15,7 +15,7 @@ package: prikotov/git-workflow
 
 ## Целевая модель
 
-- `master` или `main` — основная ветка разработки и источник обычных релизов. В примерах ниже используется `master`; для проекта с `main` замените имя в командах.
+- Основная ветка — ветка по умолчанию репозитория и источник обычных релизов; на неё указывает `origin/HEAD`.
 - `task/<short-description>` — рабочая ветка для feature, bugfix, docs и рефакторинга.
 - `release/x.y` — ветка подготовки обычного релиза или срочного исправления выпущенной линии.
 - `hotfix/x.y.z-<short-description>` — срочный patch для уже выкаченного production release.
@@ -24,7 +24,7 @@ package: prikotov/git-workflow
 
 ## Общие правила
 
-- Вноси изменения в `master`/`main` только через PR.
+- Вноси изменения в основную ветку только через PR.
 - Работай и коммить в `task/*`, `release/*` и `hotfix/*` по запросу пользователя. До срочного выпуска изменяй `release/x.y` выпущенной линии только через PR из `hotfix/*`.
 - Запрещён деплой в production из текущего состояния ветки.
 - Одна ветка — одна цель: не смешиваем разные задачи и “случайные” улучшения.
@@ -47,11 +47,14 @@ package: prikotov/git-workflow
 
 ### Task branch
 
-Для обычных задач база и цель PR — основная ветка `master` (либо `main`). Документы будущего релиза можно дополнять в этих же задачах.
+Для обычных задач база и цель PR — основная ветка. Документы будущего релиза можно дополнять в этих же задачах.
 
 ```bash
-git switch master
-git pull --ff-only origin master
+git fetch origin &&
+git remote set-head origin --auto &&
+base=$(git symbolic-ref --short refs/remotes/origin/HEAD) &&
+git switch "${base#origin/}" &&
+git pull --ff-only origin "${base#origin/}" &&
 git switch -c task/<short-description>
 ```
 
@@ -80,7 +83,7 @@ git switch -c hotfix/x.y.z-<short-description> vX.Y.Z
 
 ## Синхронизация
 
-- Синхронизируй `task/*` и ветку обычного релиза с основной веткой `master`/`main` до окончательного одобрения PR.
+- Синхронизируй `task/*` и ветку обычного релиза с основной веткой до окончательного одобрения PR.
 - Синхронизируй `hotfix/*` с целевой `release/x.y` выпущенной линии до окончательного одобрения PR.
 - До срочного выпуска не подтягивай основную ветку в `hotfix/*` или `release/x.y` исправляемой линии. Адаптацию к основной ветке выполняй после выпуска при подготовке PR возврата.
 - Если не уверен, использовать `merge` или `rebase`, — уточни у пользователя.
@@ -88,20 +91,20 @@ git switch -c hotfix/x.y.z-<short-description> vX.Y.Z
 Для обычной задачи или обычного релиза получи актуальное состояние основной ветки:
 
 ```bash
-base=master # Для проекта с main: base=main.
-git fetch origin
+git fetch origin &&
+git remote set-head origin --auto
 ```
 
 Затем используй **один** согласованный способ — merge:
 
 ```bash
-git merge "origin/$base"
+git merge origin/HEAD
 ```
 
 Или rebase:
 
 ```bash
-git rebase "origin/$base"
+git rebase origin/HEAD
 ```
 
 Изменения после одобрения требуют повторных проверок и нового одобрения по [правилам PR](pull-request.md#подготовка-pr).
