@@ -50,7 +50,8 @@ docs/
     releases/                # Описание артефактов релиза
       index.md
     templates/
-      release-plan.template.md  # Шаблон плана релиза
+      release-plan.template.md         # Шаблон плана обычного релиза
+      hotfix-release-plan.template.md  # Шаблон плана срочного исправления
 todo/                        # Внутренние задачи по доработке пакета
 ```
 

@@ -6,7 +6,8 @@ package: prikotov/git-workflow
 
 ## Структура
 
-- `docs/git-workflow/templates/release-plan.template.md` — шаблон плана релиза.
+- `docs/git-workflow/templates/release-plan.template.md` — шаблон плана обычного релиза.
+- `docs/git-workflow/templates/hotfix-release-plan.template.md` — шаблон плана срочного исправления.
 - `docs/releases/vX.Y.Z/release-plan.md` — заполненный план релиза для конкретного тега релиза.
 
 ## Правила
@@ -15,6 +16,7 @@ package: prikotov/git-workflow
 - При финализации релиза проверьте полноту документов и их соответствие составу релиза, внесите необходимые изменения.
 - Заполните обязательный `release-plan.md`: состав релиза, риски, миграции, порядок выкладки, последующие проверки и план срочного исправления при проблемах.
 
-## Шаблон
+## Шаблоны
 
-- [Шаблон плана релиза](../templates/release-plan.template.md)
+- [План обычного релиза](../templates/release-plan.template.md)
+- [План срочного исправления](../templates/hotfix-release-plan.template.md)
