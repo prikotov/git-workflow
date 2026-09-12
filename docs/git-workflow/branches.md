@@ -67,7 +67,7 @@ git switch -c task/<short-description>
 
 ### Hotfix branch
 
-По умолчанию hotfix создаётся от **текущего production tag** `vX.Y.Z`, а не от `master`.
+Создай ветку срочного исправления от **тега текущей версии в рабочей среде** `vX.Y.Z`.
 
 ```bash
 git fetch origin --tags --prune
