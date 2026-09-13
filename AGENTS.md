@@ -40,6 +40,7 @@ bin/
 docs/
   git-workflow/              # Документация, копируемая в проект-потребитель
     index.md                 # Оглавление раздела
+    glossary.md              # Словарь терминов со ссылками на определения
     branches.md              # Ветки: типы, именование, жизненный цикл
     commits.md               # Conventional Commits: формат и правила
     pull-request.md          # Процесс PR и требования
