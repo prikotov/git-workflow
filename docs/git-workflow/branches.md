@@ -60,7 +60,19 @@ git switch -c task/<short-description>
 
 ### Release branch
 
+Для нового выпуска имя ветки и тег новой версии должны быть свободны локально и в `origin`; при конфликте остановись, не перезаписывай их. В имени `release/x.y.z` укажи полную версию нового выпуска.
+
 Для обычного релиза создай ветку от актуальной основной: [процесс релиза](release.md#1-финализация-в-релизной-ветке).
+
+```bash
+git fetch origin &&
+  git remote set-head origin --auto &&
+  base=$(git symbolic-ref --short refs/remotes/origin/HEAD) &&
+  git switch "${base#origin/}" &&
+  git pull --ff-only origin "${base#origin/}" &&
+  git switch -c release/x.y.z &&
+  git push -u origin release/x.y.z
+```
 
 Правила для ветки обычного релиза:
 - коммить исправления, версии и релизные документы в этой ветке;
@@ -68,7 +80,13 @@ git switch -c task/<short-description>
 - PR обычных задач направляй в основную ветку; перед окончательным одобрением синхронизируй с ней `release/x.y.z`;
 - продолжай подготовку того же выпуска в существующей ветке; для следующего выпуска создай новую, не переиспользуй старую.
 
-Для срочного исправления создай `release/x.y.z` нового выпуска от текущего рабочего тега по [сценарию срочного исправления](release.md#hotfix-и-patch-release). Например: от `v1.2.0` — новую `release/1.2.1`, не меняя `release/1.2.0`.
+Для срочного исправления создай `release/x.y.z` нового выпуска от текущего рабочего тега `vX.Y.Z` по [сценарию срочного исправления](release.md#hotfix-и-patch-release). Например: от `v1.2.0` — новую `release/1.2.1`, не меняя `release/1.2.0`.
+
+```bash
+git fetch origin --tags --prune &&
+  git switch -c release/x.y.z vX.Y.Z &&
+  git push -u origin release/x.y.z
+```
 
 ### Hotfix branch
 
