@@ -52,8 +52,11 @@ package: prikotov/git-workflow
 
 ```bash
 git fetch origin &&
+# Обновить локальный указатель основной ветки по данным origin.
 git remote set-head origin --auto &&
+# Получить её имя, например origin/main.
 base=$(git symbolic-ref --short refs/remotes/origin/HEAD) &&
+# Убрать префикс origin/ и переключиться на локальную ветку.
 git switch "${base#origin/}" &&
 git pull --ff-only origin "${base#origin/}" &&
 git switch -c task/<short-description>
@@ -65,6 +68,7 @@ git switch -c task/<short-description>
 
 ```bash
 git fetch origin &&
+# Обновить локальный указатель основной ветки по данным origin.
 git remote set-head origin --auto
 ```
 
@@ -96,8 +100,11 @@ git merge origin/HEAD
 
 ```bash
 git fetch origin &&
+  # Обновить локальный указатель основной ветки по данным origin.
   git remote set-head origin --auto &&
+  # Получить её имя, например origin/main.
   base=$(git symbolic-ref --short refs/remotes/origin/HEAD) &&
+  # Убрать префикс origin/ и переключиться на локальную ветку.
   git switch "${base#origin/}" &&
   git pull --ff-only origin "${base#origin/}" &&
   git switch -c release/x.y.z &&
@@ -115,6 +122,7 @@ git fetch origin &&
 
 ```bash
 git fetch origin &&
+# Обновить локальный указатель основной ветки по данным origin.
 git remote set-head origin --auto
 ```
 
@@ -178,6 +186,7 @@ git merge origin/release/x.y.z
 
 ```bash
 git fetch origin &&
+# Обновить локальный указатель основной ветки по данным origin.
 git remote set-head origin --auto &&
 git switch release/x.y.z &&
 git merge origin/HEAD

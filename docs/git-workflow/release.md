@@ -102,8 +102,11 @@ git diff
 
 ```bash
 git fetch origin &&
+  # Обновить локальный указатель основной ветки по данным origin.
   git remote set-head origin --auto &&
+  # Получить её имя, например origin/main.
   base=$(git symbolic-ref --short refs/remotes/origin/HEAD) &&
+  # Убрать префикс origin/ и переключиться на локальную ветку.
   git switch "${base#origin/}" &&
   git pull --ff-only origin "${base#origin/}" &&
   git switch -c release/x.y.z &&
@@ -126,6 +129,7 @@ git fetch origin &&
 release_commit=VERIFIED_MERGE_SHA
 release_head=APPROVED_RELEASE_SHA
 git fetch origin &&
+  # Обновить локальный указатель основной ветки по данным origin.
   git remote set-head origin --auto &&
   git merge-base --is-ancestor "$release_commit" origin/HEAD &&
   git diff --exit-code "$release_head" "$release_commit" --
