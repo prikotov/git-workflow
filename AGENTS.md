@@ -40,6 +40,7 @@ bin/
 docs/
   git-workflow/              # Документация, копируемая в проект-потребитель
     index.md                 # Оглавление раздела
+    glossary.md              # Словарь терминов со ссылками на определения
     branches.md              # Ветки: типы, именование, жизненный цикл
     commits.md               # Conventional Commits: формат и правила
     pull-request.md          # Процесс PR и требования
@@ -50,7 +51,8 @@ docs/
     releases/                # Описание артефактов релиза
       index.md
     templates/
-      release-plan.template.md  # Шаблон плана релиза
+      release-plan.template.md         # Шаблон плана обычного релиза
+      hotfix-release-plan.template.md  # Шаблон плана срочного исправления
 todo/                        # Внутренние задачи по доработке пакета
 ```
 

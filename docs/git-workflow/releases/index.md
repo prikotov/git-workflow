@@ -4,20 +4,19 @@ package: prikotov/git-workflow
 
 # Артефакты релиза
 
-Этот раздел описывает документы, которые создаются для конкретного production релиза.
-
 ## Структура
 
-- `docs/git-workflow/templates/release-plan.template.md` — шаблон плана релиза.
+- `docs/git-workflow/templates/release-plan.template.md` — шаблон плана обычного релиза.
+- `docs/git-workflow/templates/hotfix-release-plan.template.md` — шаблон плана срочного исправления.
 - `docs/releases/vX.Y.Z/release-plan.md` — заполненный план релиза для конкретного тега релиза.
 
 ## Правила
 
-- Для каждого production релиза перед deploy создаётся каталог `docs/releases/vX.Y.Z/`.
-- Минимально обязательный файл в каталоге релиза: `release-plan.md`.
-- `release-plan.md` фиксирует состав релиза, риски, миграции, порядок deploy, post-check и план действий через hotfix или patch release.
-- Для `hotfix` и `patch release` создаётся отдельный каталог по новому тегу релиза.
+- Создавайте и дополняйте документы в `docs/releases/vX.Y.Z/` по мере выполнения задач. Записывайте действия до и после релиза.
+- При финализации релиза проверьте полноту документов и их соответствие составу релиза, внесите необходимые изменения.
+- Заполните обязательный `release-plan.md`: состав релиза, риски, миграции, порядок выкладки, последующие проверки и план срочного исправления при проблемах.
 
-## Шаблон
+## Шаблоны
 
-- [Шаблон плана релиза](../templates/release-plan.template.md)
+- [План обычного релиза](../templates/release-plan.template.md)
+- [План срочного исправления](../templates/hotfix-release-plan.template.md)
