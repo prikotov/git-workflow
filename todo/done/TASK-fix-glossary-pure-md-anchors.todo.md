@@ -3,7 +3,7 @@ type: fix
 created: 2026-09-22 00:39:17 (1790037557)
 due: 
 started: 2026-09-22 00:39:30 (1790037570)
-completed: 2026-09-22 00:41:36 (1790037696)
+completed: 2026-09-22 01:21:41 (1790040101)
 cancelled: 
 value: V2
 complexity: C1
@@ -16,7 +16,7 @@ author: Бэкендер Тони (pi)
 assignee: Бэкендер Тони (pi)
 branch: task/glossary-pure-md-anchors
 pr: https://github.com/prikotov/git-workflow/pull/12
-status: review
+status: done
 ---
 
 # TASK-fix-glossary-pure-md-anchors: Глоссарий — чистый Markdown вместо HTML-якорей
