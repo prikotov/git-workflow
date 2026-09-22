@@ -11,7 +11,7 @@ package: prikotov/git-workflow
 - Этот файл — оглавление раздела.
 - Детали и правила находятся в документах по ссылкам ниже.
 
-- [Словарь терминов (Glossary)](glossary.md)
+- [Словарь терминов (Glossary)](glossary/index.md)
 - [Ветки (Branches)](branches.md)
 - [Коммиты (Commits)](commits.md)
 - [Pull Request (PR)](pull-request.md)
