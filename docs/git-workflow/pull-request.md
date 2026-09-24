@@ -115,7 +115,6 @@ package: prikotov/git-workflow
 
 - После approval пользователя заверши PR через GitHub (`gh pr merge`).
 - Запрещено выполнять локальный merge PR-ветки в целевую ветку.
-- Если `gh pr merge` падает с GraphQL-ошибкой «Head branch is out of date» (бывает даже при совпадении SHA), смержи через REST API: `gh api repos/<owner>/<repo>/pulls/<N>/merge -X PUT -f merge_method=squash -f sha=<head_sha>`.
 - Head-ветку удаляй только после merge: удаление ветки до слияния автоматически закрывает PR.
 - Слей PR подготовки обычного релиза или срочного исправления до публикации тега.
 - PR возврата срочного исправления из `release/x.y.z` в основную ветку слей после выпуска. Не удаляй исходную релизную ветку при слиянии.
